@@ -1,3 +1,4 @@
+/// <reference types="google.maps" />
 // Lightweight loader + helpers for Google Maps Platform.
 // Uses the publishable browser key referrer-restricted to *.lovable.app domains.
 
