@@ -11,6 +11,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { useSignedUrl } from "@/hooks/use-signed-url";
 import { CATEGORY_LABEL, type PlaceCategory } from "@/lib/categories";
 import { ArrowLeft, Heart, MapPin, Trash2 } from "lucide-react";
+import { MapsActions } from "@/components/maps-actions";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
