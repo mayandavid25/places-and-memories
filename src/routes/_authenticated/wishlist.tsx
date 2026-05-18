@@ -274,8 +274,8 @@ function WishlistFormDialog({
       } as never;
       if (mode === "create") {
         const { error } = await supabase.from("wishlist_items").insert({
-          ...payload, couple_id: coupleId, created_by: userId,
-        });
+          ...(payload as object), couple_id: coupleId, created_by: userId,
+        } as never);
         if (error) throw error;
         toast.success("Adicionado!");
       } else if (item) {
