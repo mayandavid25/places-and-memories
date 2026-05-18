@@ -17,6 +17,8 @@ import { ptBR } from "date-fns/locale";
 import { CATEGORIES, CATEGORY_LABEL, WISHLIST_STATUS_LABEL } from "@/lib/categories";
 import { useSignedUrl } from "@/hooks/use-signed-url";
 import { cn } from "@/lib/utils";
+import { PlaceAutocomplete } from "@/components/place-autocomplete";
+import { MapsActions } from "@/components/maps-actions";
 
 export const Route = createFileRoute("/_authenticated/wishlist")({ component: WishlistPage });
 
