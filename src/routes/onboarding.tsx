@@ -40,7 +40,7 @@ function OnboardingPage() {
     setBusy(true);
     try {
       const { data, error } = await supabase.rpc("create_couple_with_invite", {
-        _name: profile?.display_name ?? null,
+        _name: profile?.display_name ?? undefined,
       });
       if (error) throw error;
       const row = Array.isArray(data) ? data[0] : data;
