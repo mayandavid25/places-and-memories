@@ -266,9 +266,12 @@ function WishlistFormDialog({
         status: status as never,
         planned_date: plannedDate || null,
         location: location.trim() || null,
+        formatted_address: coords.formatted_address,
+        lat: coords.lat,
+        lng: coords.lng,
         note: note.trim() || null,
         photos,
-      };
+      } as never;
       if (mode === "create") {
         const { error } = await supabase.from("wishlist_items").insert({
           ...payload, couple_id: coupleId, created_by: userId,
