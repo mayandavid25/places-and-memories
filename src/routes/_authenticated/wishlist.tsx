@@ -213,6 +213,11 @@ function WishlistFormDialog({
   const [status, setStatus] = useState(item?.status ?? "queremos_visitar");
   const [plannedDate, setPlannedDate] = useState(item?.planned_date ?? "");
   const [location, setLocation] = useState(item?.location ?? "");
+  const [coords, setCoords] = useState<{ lat: number | null; lng: number | null; formatted_address: string | null }>({
+    lat: item?.lat ?? null,
+    lng: item?.lng ?? null,
+    formatted_address: item?.formatted_address ?? null,
+  });
   const [note, setNote] = useState(item?.note ?? "");
   const [photos, setPhotos] = useState<string[]>(item?.photos ?? []);
   const [uploading, setUploading] = useState(false);
@@ -226,6 +231,7 @@ function WishlistFormDialog({
       setStatus(item.status);
       setPlannedDate(item.planned_date ?? "");
       setLocation(item.location ?? "");
+      setCoords({ lat: item.lat ?? null, lng: item.lng ?? null, formatted_address: item.formatted_address ?? null });
       setNote(item.note ?? "");
       setPhotos(item.photos ?? []);
     }
