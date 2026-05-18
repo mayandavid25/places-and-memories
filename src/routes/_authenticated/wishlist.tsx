@@ -17,6 +17,8 @@ import { ptBR } from "date-fns/locale";
 import { CATEGORIES, CATEGORY_LABEL, WISHLIST_STATUS_LABEL } from "@/lib/categories";
 import { useSignedUrl } from "@/hooks/use-signed-url";
 import { cn } from "@/lib/utils";
+import { PlaceAutocomplete } from "@/components/place-autocomplete";
+import { MapsActions } from "@/components/maps-actions";
 
 export const Route = createFileRoute("/_authenticated/wishlist")({ component: WishlistPage });
 
@@ -31,6 +33,9 @@ type WishlistItem = {
   note: string | null;
   planned_date: string | null;
   location: string | null;
+  formatted_address: string | null;
+  lat: number | null;
+  lng: number | null;
   photos: string[];
   created_at: string;
 };
@@ -174,6 +179,11 @@ function WishlistRow({
               </span>
             )}
           </div>
+          {item.location && (
+            <div className="mt-1.5">
+              <MapsActions query={item.formatted_address ?? item.location} lat={item.lat} lng={item.lng} />
+            </div>
+          )}
         </div>
       </button>
       <Select value={item.status} onValueChange={onStatus}>
@@ -203,6 +213,11 @@ function WishlistFormDialog({
   const [status, setStatus] = useState(item?.status ?? "queremos_visitar");
   const [plannedDate, setPlannedDate] = useState(item?.planned_date ?? "");
   const [location, setLocation] = useState(item?.location ?? "");
+  const [coords, setCoords] = useState<{ lat: number | null; lng: number | null; formatted_address: string | null }>({
+    lat: item?.lat ?? null,
+    lng: item?.lng ?? null,
+    formatted_address: item?.formatted_address ?? null,
+  });
   const [note, setNote] = useState(item?.note ?? "");
   const [photos, setPhotos] = useState<string[]>(item?.photos ?? []);
   const [uploading, setUploading] = useState(false);
@@ -216,6 +231,7 @@ function WishlistFormDialog({
       setStatus(item.status);
       setPlannedDate(item.planned_date ?? "");
       setLocation(item.location ?? "");
+      setCoords({ lat: item.lat ?? null, lng: item.lng ?? null, formatted_address: item.formatted_address ?? null });
       setNote(item.note ?? "");
       setPhotos(item.photos ?? []);
     }
@@ -250,13 +266,16 @@ function WishlistFormDialog({
         status: status as never,
         planned_date: plannedDate || null,
         location: location.trim() || null,
+        formatted_address: coords.formatted_address,
+        lat: coords.lat,
+        lng: coords.lng,
         note: note.trim() || null,
         photos,
-      };
+      } as never;
       if (mode === "create") {
         const { error } = await supabase.from("wishlist_items").insert({
-          ...payload, couple_id: coupleId, created_by: userId,
-        });
+          ...(payload as object), couple_id: coupleId, created_by: userId,
+        } as never);
         if (error) throw error;
         toast.success("Adicionado!");
       } else if (item) {
@@ -332,7 +351,16 @@ function WishlistFormDialog({
 
         <div className="space-y-1.5">
           <Label>Endereço</Label>
-          <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Bairro, cidade..." className="h-11 rounded-xl" />
+          <PlaceAutocomplete
+            value={location}
+            onChange={(v) => {
+              setLocation(v);
+              setCoords({ lat: null, lng: null, formatted_address: null });
+            }}
+            onSelect={(s) => setCoords(s)}
+            placeholder="Buscar endereço..."
+            className="h-11 rounded-xl"
+          />
         </div>
 
         <div className="space-y-1.5">

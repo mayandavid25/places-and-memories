@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { StarRating } from "@/components/star-rating";
+import { PlaceAutocomplete } from "@/components/place-autocomplete";
 import { toast } from "sonner";
 import { CATEGORIES, CATEGORY_LABEL, type PlaceCategory } from "@/lib/categories";
 import { Upload, X } from "lucide-react";
@@ -26,6 +27,9 @@ function NovoLugarPage() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState<PlaceCategory>("restaurante");
   const [location, setLocation] = useState("");
+  const [coords, setCoords] = useState<{ lat: number | null; lng: number | null; formatted_address: string | null }>({
+    lat: null, lng: null, formatted_address: null,
+  });
   const [visitedAt, setVisitedAt] = useState<string>("");
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -63,10 +67,13 @@ function NovoLugarPage() {
           name,
           category,
           location: location || null,
+          formatted_address: coords.formatted_address,
+          lat: coords.lat,
+          lng: coords.lng,
           visited_at: visitedAt || null,
           photos,
           created_by: user.id,
-        })
+        } as never)
         .select("id")
         .single();
       if (error) throw error;
@@ -79,6 +86,22 @@ function NovoLugarPage() {
           comment: comment || null,
         });
       }
+
+      // Sync com calendário: cria evento vinculado quando há data da visita
+      if (visitedAt) {
+        await supabase.from("events").insert({
+          couple_id: coupleId,
+          created_by: user.id,
+          title: name,
+          date: visitedAt,
+          location: coords.formatted_address ?? location ?? null,
+          formatted_address: coords.formatted_address,
+          lat: coords.lat,
+          lng: coords.lng,
+          place_id: place.id,
+        } as never);
+      }
+
       toast.success("Lugar adicionado!");
       void navigate({ to: "/lugares/$id", params: { id: place.id } });
     } catch (err) {
@@ -126,7 +149,17 @@ function NovoLugarPage() {
 
         <div className="space-y-1.5">
           <Label htmlFor="loc">Localização</Label>
-          <Input id="loc" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Bairro, cidade..." className="h-11 rounded-xl" />
+          <PlaceAutocomplete
+            id="loc"
+            value={location}
+            onChange={(v) => {
+              setLocation(v);
+              setCoords({ lat: null, lng: null, formatted_address: null });
+            }}
+            onSelect={(s) => setCoords(s)}
+            placeholder="Buscar endereço..."
+            className="h-11 rounded-xl"
+          />
         </div>
 
         <div className="space-y-1.5">

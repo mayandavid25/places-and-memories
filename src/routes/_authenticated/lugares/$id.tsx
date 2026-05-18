@@ -11,6 +11,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { useSignedUrl } from "@/hooks/use-signed-url";
 import { CATEGORY_LABEL, type PlaceCategory } from "@/lib/categories";
 import { ArrowLeft, Heart, MapPin, Trash2 } from "lucide-react";
+import { MapsActions } from "@/components/maps-actions";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -30,7 +31,7 @@ function PlaceDetailPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("places")
-        .select("id, name, category, location, photos, favorited, visited_at, couple_id, created_by")
+        .select("id, name, category, location, formatted_address, lat, lng, photos, favorited, visited_at, couple_id, created_by")
         .eq("id", id)
         .single();
       if (error) throw error;
@@ -89,9 +90,19 @@ function PlaceDetailPage() {
           </p>
           <h1 className="mt-1 font-serif text-4xl text-foreground">{place.name}</h1>
           {place.location && (
-            <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5" /> {place.location}
-            </p>
+            <>
+              <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5" /> {(place as { formatted_address?: string | null }).formatted_address ?? place.location}
+              </p>
+              <div className="mt-2">
+                <MapsActions
+                  query={(place as { formatted_address?: string | null }).formatted_address ?? place.location}
+                  lat={(place as { lat?: number | null }).lat ?? null}
+                  lng={(place as { lng?: number | null }).lng ?? null}
+                  size="md"
+                />
+              </div>
+            </>
           )}
           {place.visited_at && (
             <p className="mt-1 text-xs text-muted-foreground">

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import {
   addMonths, eachDayOfInterval, endOfMonth, format, isSameDay, isSameMonth,
@@ -17,12 +17,15 @@ import {
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { PlaceAutocomplete } from "@/components/place-autocomplete";
+import { MapsActions } from "@/components/maps-actions";
 
 export const Route = createFileRoute("/_authenticated/calendario")({ component: CalendarPage });
 
 function CalendarPage() {
   const { user, profile } = useAuth();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const coupleId = profile?.couple_id;
   const [month, setMonth] = useState(new Date());
   const [open, setOpen] = useState(false);
@@ -30,6 +33,9 @@ function CalendarPage() {
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
+  const [coords, setCoords] = useState<{ lat: number | null; lng: number | null; formatted_address: string | null }>({
+    lat: null, lng: null, formatted_address: null,
+  });
   const [description, setDescription] = useState("");
 
   const { data: events } = useQuery({
@@ -51,10 +57,20 @@ function CalendarPage() {
   const submit = async () => {
     if (!user || !coupleId || !title || !date) return;
     const { error } = await supabase.from("events").insert({
-      couple_id: coupleId, title, description: description || null, date, time: time || null, location: location || null, created_by: user.id,
-    });
+      couple_id: coupleId,
+      title,
+      description: description || null,
+      date,
+      time: time || null,
+      location: coords.formatted_address ?? location ?? null,
+      formatted_address: coords.formatted_address,
+      lat: coords.lat,
+      lng: coords.lng,
+      created_by: user.id,
+    } as never);
     if (error) return toast.error(error.message);
     setTitle(""); setTime(""); setLocation(""); setDescription("");
+    setCoords({ lat: null, lng: null, formatted_address: null });
     setOpen(false);
     qc.invalidateQueries({ queryKey: ["events"] });
   };
@@ -84,7 +100,19 @@ function CalendarPage() {
                   <div><Label>Data</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-xl" /></div>
                   <div><Label>Hora</Label><Input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="rounded-xl" /></div>
                 </div>
-                <div><Label>Local</Label><Input value={location} onChange={(e) => setLocation(e.target.value)} className="rounded-xl" /></div>
+                <div>
+                  <Label>Local</Label>
+                  <PlaceAutocomplete
+                    value={location}
+                    onChange={(v) => {
+                      setLocation(v);
+                      setCoords({ lat: null, lng: null, formatted_address: null });
+                    }}
+                    onSelect={(s) => setCoords(s)}
+                    placeholder="Buscar endereço..."
+                    className="rounded-xl"
+                  />
+                </div>
                 <div><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="rounded-xl" /></div>
                 <Button onClick={submit} className="w-full rounded-xl">Salvar</Button>
               </div>
@@ -128,19 +156,36 @@ function CalendarPage() {
       <section className="mt-8">
         <h2 className="mb-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">Próximos eventos</h2>
         <div className="space-y-2">
-          {upcoming.map((e) => (
-            <div key={e.id} className="flex items-center gap-4 rounded-2xl border border-border bg-card px-4 py-3">
-              <div className="text-center">
-                <p className="font-serif text-2xl leading-none">{format(new Date(e.date + "T00:00"), "d")}</p>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{format(new Date(e.date + "T00:00"), "MMM", { locale: ptBR })}</p>
+          {upcoming.map((e) => {
+            const ev = e as typeof e & { lat: number | null; lng: number | null; formatted_address: string | null; place_id: string | null };
+            return (
+              <div key={e.id} className="flex items-center gap-4 rounded-2xl border border-border bg-card px-4 py-3">
+                <div className="text-center">
+                  <p className="font-serif text-2xl leading-none">{format(new Date(e.date + "T00:00"), "d")}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{format(new Date(e.date + "T00:00"), "MMM", { locale: ptBR })}</p>
+                </div>
+                <div className="min-w-0 flex-1">
+                  {ev.place_id ? (
+                    <button
+                      onClick={() => navigate({ to: "/lugares/$id", params: { id: ev.place_id! } })}
+                      className="block max-w-full truncate text-left text-sm font-medium hover:text-primary"
+                    >
+                      {e.title}
+                    </button>
+                  ) : (
+                    <p className="truncate text-sm font-medium">{e.title}</p>
+                  )}
+                  <p className="truncate text-xs text-muted-foreground">{[e.time, ev.formatted_address ?? e.location].filter(Boolean).join(" · ")}</p>
+                  {(e.location || ev.lat != null) && (
+                    <div className="mt-1.5">
+                      <MapsActions query={ev.formatted_address ?? e.location} lat={ev.lat} lng={ev.lng} />
+                    </div>
+                  )}
+                </div>
+                <button onClick={() => remove(e.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{e.title}</p>
-                <p className="truncate text-xs text-muted-foreground">{[e.time, e.location].filter(Boolean).join(" · ")}</p>
-              </div>
-              <button onClick={() => remove(e.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
-            </div>
-          ))}
+            );
+          })}
           {upcoming.length === 0 && <p className="text-sm text-muted-foreground">Nada planejado por enquanto.</p>}
         </div>
       </section>
