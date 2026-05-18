@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { StarRating } from "@/components/star-rating";
+import { PlaceAutocomplete } from "@/components/place-autocomplete";
 import { toast } from "sonner";
 import { CATEGORIES, CATEGORY_LABEL, type PlaceCategory } from "@/lib/categories";
 import { Upload, X } from "lucide-react";
