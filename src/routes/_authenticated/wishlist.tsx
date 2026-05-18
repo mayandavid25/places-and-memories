@@ -33,6 +33,9 @@ type WishlistItem = {
   note: string | null;
   planned_date: string | null;
   location: string | null;
+  formatted_address: string | null;
+  lat: number | null;
+  lng: number | null;
   photos: string[];
   created_at: string;
 };
