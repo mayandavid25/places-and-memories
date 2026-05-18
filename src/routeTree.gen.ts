@@ -14,7 +14,12 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticated/wishlist'
+import { Route as AuthenticatedRankingRouteImport } from './routes/_authenticated/ranking'
+import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedEntretenimentoRouteImport } from './routes/_authenticated/entretenimento'
+import { Route as AuthenticatedCalendarioRouteImport } from './routes/_authenticated/calendario'
 import { Route as AuthenticatedLugaresIndexRouteImport } from './routes/_authenticated/lugares/index'
 import { Route as AuthenticatedLugaresNovoRouteImport } from './routes/_authenticated/lugares/novo'
 import { Route as AuthenticatedLugaresIdRouteImport } from './routes/_authenticated/lugares/$id'
@@ -43,9 +48,35 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedWishlistRoute = AuthenticatedWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedRankingRoute = AuthenticatedRankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedEntretenimentoRoute =
+  AuthenticatedEntretenimentoRouteImport.update({
+    id: '/entretenimento',
+    path: '/entretenimento',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedCalendarioRoute = AuthenticatedCalendarioRouteImport.update({
+  id: '/calendario',
+  path: '/calendario',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedLugaresIndexRoute =
@@ -71,7 +102,12 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/calendario': typeof AuthenticatedCalendarioRoute
+  '/entretenimento': typeof AuthenticatedEntretenimentoRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/ranking': typeof AuthenticatedRankingRoute
+  '/wishlist': typeof AuthenticatedWishlistRoute
   '/lugares/$id': typeof AuthenticatedLugaresIdRoute
   '/lugares/novo': typeof AuthenticatedLugaresNovoRoute
   '/lugares/': typeof AuthenticatedLugaresIndexRoute
@@ -81,7 +117,12 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/calendario': typeof AuthenticatedCalendarioRoute
+  '/entretenimento': typeof AuthenticatedEntretenimentoRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/ranking': typeof AuthenticatedRankingRoute
+  '/wishlist': typeof AuthenticatedWishlistRoute
   '/lugares/$id': typeof AuthenticatedLugaresIdRoute
   '/lugares/novo': typeof AuthenticatedLugaresNovoRoute
   '/lugares': typeof AuthenticatedLugaresIndexRoute
@@ -93,7 +134,12 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/calendario': typeof AuthenticatedCalendarioRoute
+  '/_authenticated/entretenimento': typeof AuthenticatedEntretenimentoRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/ranking': typeof AuthenticatedRankingRoute
+  '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/_authenticated/lugares/$id': typeof AuthenticatedLugaresIdRoute
   '/_authenticated/lugares/novo': typeof AuthenticatedLugaresNovoRoute
   '/_authenticated/lugares/': typeof AuthenticatedLugaresIndexRoute
@@ -105,7 +151,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/reset-password'
+    | '/calendario'
+    | '/entretenimento'
     | '/home'
+    | '/perfil'
+    | '/ranking'
+    | '/wishlist'
     | '/lugares/$id'
     | '/lugares/novo'
     | '/lugares/'
@@ -115,7 +166,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/reset-password'
+    | '/calendario'
+    | '/entretenimento'
     | '/home'
+    | '/perfil'
+    | '/ranking'
+    | '/wishlist'
     | '/lugares/$id'
     | '/lugares/novo'
     | '/lugares'
@@ -126,7 +182,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/reset-password'
+    | '/_authenticated/calendario'
+    | '/_authenticated/entretenimento'
     | '/_authenticated/home'
+    | '/_authenticated/perfil'
+    | '/_authenticated/ranking'
+    | '/_authenticated/wishlist'
     | '/_authenticated/lugares/$id'
     | '/_authenticated/lugares/novo'
     | '/_authenticated/lugares/'
@@ -177,11 +238,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/wishlist': {
+      id: '/_authenticated/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof AuthenticatedWishlistRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/ranking': {
+      id: '/_authenticated/ranking'
+      path: '/ranking'
+      fullPath: '/ranking'
+      preLoaderRoute: typeof AuthenticatedRankingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/perfil': {
+      id: '/_authenticated/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/home': {
       id: '/_authenticated/home'
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/entretenimento': {
+      id: '/_authenticated/entretenimento'
+      path: '/entretenimento'
+      fullPath: '/entretenimento'
+      preLoaderRoute: typeof AuthenticatedEntretenimentoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/calendario': {
+      id: '/_authenticated/calendario'
+      path: '/calendario'
+      fullPath: '/calendario'
+      preLoaderRoute: typeof AuthenticatedCalendarioRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/lugares/': {
@@ -209,14 +305,24 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedCalendarioRoute: typeof AuthenticatedCalendarioRoute
+  AuthenticatedEntretenimentoRoute: typeof AuthenticatedEntretenimentoRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedRankingRoute: typeof AuthenticatedRankingRoute
+  AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
   AuthenticatedLugaresIdRoute: typeof AuthenticatedLugaresIdRoute
   AuthenticatedLugaresNovoRoute: typeof AuthenticatedLugaresNovoRoute
   AuthenticatedLugaresIndexRoute: typeof AuthenticatedLugaresIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedCalendarioRoute: AuthenticatedCalendarioRoute,
+  AuthenticatedEntretenimentoRoute: AuthenticatedEntretenimentoRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedRankingRoute: AuthenticatedRankingRoute,
+  AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
   AuthenticatedLugaresIdRoute: AuthenticatedLugaresIdRoute,
   AuthenticatedLugaresNovoRoute: AuthenticatedLugaresNovoRoute,
   AuthenticatedLugaresIndexRoute: AuthenticatedLugaresIndexRoute,
