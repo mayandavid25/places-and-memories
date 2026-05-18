@@ -156,19 +156,36 @@ function CalendarPage() {
       <section className="mt-8">
         <h2 className="mb-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">Próximos eventos</h2>
         <div className="space-y-2">
-          {upcoming.map((e) => (
-            <div key={e.id} className="flex items-center gap-4 rounded-2xl border border-border bg-card px-4 py-3">
-              <div className="text-center">
-                <p className="font-serif text-2xl leading-none">{format(new Date(e.date + "T00:00"), "d")}</p>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{format(new Date(e.date + "T00:00"), "MMM", { locale: ptBR })}</p>
+          {upcoming.map((e) => {
+            const ev = e as typeof e & { lat: number | null; lng: number | null; formatted_address: string | null; place_id: string | null };
+            return (
+              <div key={e.id} className="flex items-center gap-4 rounded-2xl border border-border bg-card px-4 py-3">
+                <div className="text-center">
+                  <p className="font-serif text-2xl leading-none">{format(new Date(e.date + "T00:00"), "d")}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{format(new Date(e.date + "T00:00"), "MMM", { locale: ptBR })}</p>
+                </div>
+                <div className="min-w-0 flex-1">
+                  {ev.place_id ? (
+                    <button
+                      onClick={() => navigate({ to: "/lugares/$id", params: { id: ev.place_id! } })}
+                      className="block max-w-full truncate text-left text-sm font-medium hover:text-primary"
+                    >
+                      {e.title}
+                    </button>
+                  ) : (
+                    <p className="truncate text-sm font-medium">{e.title}</p>
+                  )}
+                  <p className="truncate text-xs text-muted-foreground">{[e.time, ev.formatted_address ?? e.location].filter(Boolean).join(" · ")}</p>
+                  {(e.location || ev.lat != null) && (
+                    <div className="mt-1.5">
+                      <MapsActions query={ev.formatted_address ?? e.location} lat={ev.lat} lng={ev.lng} />
+                    </div>
+                  )}
+                </div>
+                <button onClick={() => remove(e.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{e.title}</p>
-                <p className="truncate text-xs text-muted-foreground">{[e.time, e.location].filter(Boolean).join(" · ")}</p>
-              </div>
-              <button onClick={() => remove(e.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
-            </div>
-          ))}
+            );
+          })}
           {upcoming.length === 0 && <p className="text-sm text-muted-foreground">Nada planejado por enquanto.</p>}
         </div>
       </section>
