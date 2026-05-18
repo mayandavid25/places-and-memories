@@ -9,38 +9,228 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticated/wishlist'
+import { Route as AuthenticatedRankingRouteImport } from './routes/_authenticated/ranking'
+import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedEntretenimentoRouteImport } from './routes/_authenticated/entretenimento'
+import { Route as AuthenticatedCalendarioRouteImport } from './routes/_authenticated/calendario'
+import { Route as AuthenticatedLugaresIndexRouteImport } from './routes/_authenticated/lugares/index'
+import { Route as AuthenticatedLugaresNovoRouteImport } from './routes/_authenticated/lugares/novo'
+import { Route as AuthenticatedLugaresIdRouteImport } from './routes/_authenticated/lugares/$id'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedWishlistRoute = AuthenticatedWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedRankingRoute = AuthenticatedRankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedEntretenimentoRoute =
+  AuthenticatedEntretenimentoRouteImport.update({
+    id: '/entretenimento',
+    path: '/entretenimento',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedCalendarioRoute = AuthenticatedCalendarioRouteImport.update({
+  id: '/calendario',
+  path: '/calendario',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedLugaresIndexRoute =
+  AuthenticatedLugaresIndexRouteImport.update({
+    id: '/lugares/',
+    path: '/lugares/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedLugaresNovoRoute =
+  AuthenticatedLugaresNovoRouteImport.update({
+    id: '/lugares/novo',
+    path: '/lugares/novo',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedLugaresIdRoute = AuthenticatedLugaresIdRouteImport.update({
+  id: '/lugares/$id',
+  path: '/lugares/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/calendario': typeof AuthenticatedCalendarioRoute
+  '/entretenimento': typeof AuthenticatedEntretenimentoRoute
+  '/home': typeof AuthenticatedHomeRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/ranking': typeof AuthenticatedRankingRoute
+  '/wishlist': typeof AuthenticatedWishlistRoute
+  '/lugares/$id': typeof AuthenticatedLugaresIdRoute
+  '/lugares/novo': typeof AuthenticatedLugaresNovoRoute
+  '/lugares/': typeof AuthenticatedLugaresIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/calendario': typeof AuthenticatedCalendarioRoute
+  '/entretenimento': typeof AuthenticatedEntretenimentoRoute
+  '/home': typeof AuthenticatedHomeRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
+  '/ranking': typeof AuthenticatedRankingRoute
+  '/wishlist': typeof AuthenticatedWishlistRoute
+  '/lugares/$id': typeof AuthenticatedLugaresIdRoute
+  '/lugares/novo': typeof AuthenticatedLugaresNovoRoute
+  '/lugares': typeof AuthenticatedLugaresIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/calendario': typeof AuthenticatedCalendarioRoute
+  '/_authenticated/entretenimento': typeof AuthenticatedEntretenimentoRoute
+  '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/ranking': typeof AuthenticatedRankingRoute
+  '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
+  '/_authenticated/lugares/$id': typeof AuthenticatedLugaresIdRoute
+  '/_authenticated/lugares/novo': typeof AuthenticatedLugaresNovoRoute
+  '/_authenticated/lugares/': typeof AuthenticatedLugaresIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/onboarding'
+    | '/reset-password'
+    | '/calendario'
+    | '/entretenimento'
+    | '/home'
+    | '/perfil'
+    | '/ranking'
+    | '/wishlist'
+    | '/lugares/$id'
+    | '/lugares/novo'
+    | '/lugares/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/onboarding'
+    | '/reset-password'
+    | '/calendario'
+    | '/entretenimento'
+    | '/home'
+    | '/perfil'
+    | '/ranking'
+    | '/wishlist'
+    | '/lugares/$id'
+    | '/lugares/novo'
+    | '/lugares'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/login'
+    | '/onboarding'
+    | '/reset-password'
+    | '/_authenticated/calendario'
+    | '/_authenticated/entretenimento'
+    | '/_authenticated/home'
+    | '/_authenticated/perfil'
+    | '/_authenticated/ranking'
+    | '/_authenticated/wishlist'
+    | '/_authenticated/lugares/$id'
+    | '/_authenticated/lugares/novo'
+    | '/_authenticated/lugares/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +238,107 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/wishlist': {
+      id: '/_authenticated/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof AuthenticatedWishlistRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/ranking': {
+      id: '/_authenticated/ranking'
+      path: '/ranking'
+      fullPath: '/ranking'
+      preLoaderRoute: typeof AuthenticatedRankingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/perfil': {
+      id: '/_authenticated/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/home': {
+      id: '/_authenticated/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthenticatedHomeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/entretenimento': {
+      id: '/_authenticated/entretenimento'
+      path: '/entretenimento'
+      fullPath: '/entretenimento'
+      preLoaderRoute: typeof AuthenticatedEntretenimentoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/calendario': {
+      id: '/_authenticated/calendario'
+      path: '/calendario'
+      fullPath: '/calendario'
+      preLoaderRoute: typeof AuthenticatedCalendarioRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/lugares/': {
+      id: '/_authenticated/lugares/'
+      path: '/lugares'
+      fullPath: '/lugares/'
+      preLoaderRoute: typeof AuthenticatedLugaresIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/lugares/novo': {
+      id: '/_authenticated/lugares/novo'
+      path: '/lugares/novo'
+      fullPath: '/lugares/novo'
+      preLoaderRoute: typeof AuthenticatedLugaresNovoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/lugares/$id': {
+      id: '/_authenticated/lugares/$id'
+      path: '/lugares/$id'
+      fullPath: '/lugares/$id'
+      preLoaderRoute: typeof AuthenticatedLugaresIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedCalendarioRoute: typeof AuthenticatedCalendarioRoute
+  AuthenticatedEntretenimentoRoute: typeof AuthenticatedEntretenimentoRoute
+  AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedRankingRoute: typeof AuthenticatedRankingRoute
+  AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
+  AuthenticatedLugaresIdRoute: typeof AuthenticatedLugaresIdRoute
+  AuthenticatedLugaresNovoRoute: typeof AuthenticatedLugaresNovoRoute
+  AuthenticatedLugaresIndexRoute: typeof AuthenticatedLugaresIndexRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedCalendarioRoute: AuthenticatedCalendarioRoute,
+  AuthenticatedEntretenimentoRoute: AuthenticatedEntretenimentoRoute,
+  AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedRankingRoute: AuthenticatedRankingRoute,
+  AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
+  AuthenticatedLugaresIdRoute: AuthenticatedLugaresIdRoute,
+  AuthenticatedLugaresNovoRoute: AuthenticatedLugaresNovoRoute,
+  AuthenticatedLugaresIndexRoute: AuthenticatedLugaresIndexRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
