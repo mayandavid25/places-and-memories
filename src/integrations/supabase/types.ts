@@ -311,8 +311,11 @@ export type Database = {
           created_at: string
           created_by: string
           id: string
+          location: string | null
           name: string
           note: string | null
+          photos: string[]
+          planned_date: string | null
           priority: number
           status: Database["public"]["Enums"]["wishlist_status"]
         }
@@ -322,8 +325,11 @@ export type Database = {
           created_at?: string
           created_by: string
           id?: string
+          location?: string | null
           name: string
           note?: string | null
+          photos?: string[]
+          planned_date?: string | null
           priority?: number
           status?: Database["public"]["Enums"]["wishlist_status"]
         }
@@ -333,8 +339,11 @@ export type Database = {
           created_at?: string
           created_by?: string
           id?: string
+          location?: string | null
           name?: string
           note?: string | null
+          photos?: string[]
+          planned_date?: string | null
           priority?: number
           status?: Database["public"]["Enums"]["wishlist_status"]
         }
