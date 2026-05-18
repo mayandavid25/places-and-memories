@@ -16,6 +16,8 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedLugaresIndexRouteImport } from './routes/_authenticated/lugares/index'
+import { Route as AuthenticatedLugaresNovoRouteImport } from './routes/_authenticated/lugares/novo'
+import { Route as AuthenticatedLugaresIdRouteImport } from './routes/_authenticated/lugares/$id'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -52,6 +54,17 @@ const AuthenticatedLugaresIndexRoute =
     path: '/lugares/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedLugaresNovoRoute =
+  AuthenticatedLugaresNovoRouteImport.update({
+    id: '/lugares/novo',
+    path: '/lugares/novo',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedLugaresIdRoute = AuthenticatedLugaresIdRouteImport.update({
+  id: '/lugares/$id',
+  path: '/lugares/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,6 +72,8 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/lugares/$id': typeof AuthenticatedLugaresIdRoute
+  '/lugares/novo': typeof AuthenticatedLugaresNovoRoute
   '/lugares/': typeof AuthenticatedLugaresIndexRoute
 }
 export interface FileRoutesByTo {
@@ -67,6 +82,8 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/lugares/$id': typeof AuthenticatedLugaresIdRoute
+  '/lugares/novo': typeof AuthenticatedLugaresNovoRoute
   '/lugares': typeof AuthenticatedLugaresIndexRoute
 }
 export interface FileRoutesById {
@@ -77,6 +94,8 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/lugares/$id': typeof AuthenticatedLugaresIdRoute
+  '/_authenticated/lugares/novo': typeof AuthenticatedLugaresNovoRoute
   '/_authenticated/lugares/': typeof AuthenticatedLugaresIndexRoute
 }
 export interface FileRouteTypes {
@@ -87,9 +106,19 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/reset-password'
     | '/home'
+    | '/lugares/$id'
+    | '/lugares/novo'
     | '/lugares/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/onboarding' | '/reset-password' | '/home' | '/lugares'
+  to:
+    | '/'
+    | '/login'
+    | '/onboarding'
+    | '/reset-password'
+    | '/home'
+    | '/lugares/$id'
+    | '/lugares/novo'
+    | '/lugares'
   id:
     | '__root__'
     | '/'
@@ -98,6 +127,8 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/reset-password'
     | '/_authenticated/home'
+    | '/_authenticated/lugares/$id'
+    | '/_authenticated/lugares/novo'
     | '/_authenticated/lugares/'
   fileRoutesById: FileRoutesById
 }
@@ -160,16 +191,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLugaresIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/lugares/novo': {
+      id: '/_authenticated/lugares/novo'
+      path: '/lugares/novo'
+      fullPath: '/lugares/novo'
+      preLoaderRoute: typeof AuthenticatedLugaresNovoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/lugares/$id': {
+      id: '/_authenticated/lugares/$id'
+      path: '/lugares/$id'
+      fullPath: '/lugares/$id'
+      preLoaderRoute: typeof AuthenticatedLugaresIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedLugaresIdRoute: typeof AuthenticatedLugaresIdRoute
+  AuthenticatedLugaresNovoRoute: typeof AuthenticatedLugaresNovoRoute
   AuthenticatedLugaresIndexRoute: typeof AuthenticatedLugaresIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedLugaresIdRoute: AuthenticatedLugaresIdRoute,
+  AuthenticatedLugaresNovoRoute: AuthenticatedLugaresNovoRoute,
   AuthenticatedLugaresIndexRoute: AuthenticatedLugaresIndexRoute,
 }
 
