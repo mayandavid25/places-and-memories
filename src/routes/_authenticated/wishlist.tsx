@@ -351,7 +351,16 @@ function WishlistFormDialog({
 
         <div className="space-y-1.5">
           <Label>Endereço</Label>
-          <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Bairro, cidade..." className="h-11 rounded-xl" />
+          <PlaceAutocomplete
+            value={location}
+            onChange={(v) => {
+              setLocation(v);
+              setCoords({ lat: null, lng: null, formatted_address: null });
+            }}
+            onSelect={(s) => setCoords(s)}
+            placeholder="Buscar endereço..."
+            className="h-11 rounded-xl"
+          />
         </div>
 
         <div className="space-y-1.5">
