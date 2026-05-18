@@ -100,7 +100,19 @@ function CalendarPage() {
                   <div><Label>Data</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-xl" /></div>
                   <div><Label>Hora</Label><Input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="rounded-xl" /></div>
                 </div>
-                <div><Label>Local</Label><Input value={location} onChange={(e) => setLocation(e.target.value)} className="rounded-xl" /></div>
+                <div>
+                  <Label>Local</Label>
+                  <PlaceAutocomplete
+                    value={location}
+                    onChange={(v) => {
+                      setLocation(v);
+                      setCoords({ lat: null, lng: null, formatted_address: null });
+                    }}
+                    onSelect={(s) => setCoords(s)}
+                    placeholder="Buscar endereço..."
+                    className="rounded-xl"
+                  />
+                </div>
                 <div><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="rounded-xl" /></div>
                 <Button onClick={submit} className="w-full rounded-xl">Salvar</Button>
               </div>
