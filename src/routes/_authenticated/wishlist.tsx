@@ -179,6 +179,11 @@ function WishlistRow({
               </span>
             )}
           </div>
+          {item.location && (
+            <div className="mt-1.5">
+              <MapsActions query={item.formatted_address ?? item.location} lat={item.lat} lng={item.lng} />
+            </div>
+          )}
         </div>
       </button>
       <Select value={item.status} onValueChange={onStatus}>
