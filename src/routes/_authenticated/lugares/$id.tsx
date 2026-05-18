@@ -90,9 +90,19 @@ function PlaceDetailPage() {
           </p>
           <h1 className="mt-1 font-serif text-4xl text-foreground">{place.name}</h1>
           {place.location && (
-            <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5" /> {place.location}
-            </p>
+            <>
+              <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5" /> {(place as { formatted_address?: string | null }).formatted_address ?? place.location}
+              </p>
+              <div className="mt-2">
+                <MapsActions
+                  query={(place as { formatted_address?: string | null }).formatted_address ?? place.location}
+                  lat={(place as { lat?: number | null }).lat ?? null}
+                  lng={(place as { lng?: number | null }).lng ?? null}
+                  size="md"
+                />
+              </div>
+            </>
           )}
           {place.visited_at && (
             <p className="mt-1 text-xs text-muted-foreground">
