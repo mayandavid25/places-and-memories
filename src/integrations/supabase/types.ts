@@ -353,6 +353,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_couple_with_invite: {
+        Args: { _name?: string }
+        Returns: {
+          couple_id: string
+          invite_code: string
+        }[]
+      }
       current_couple_id: { Args: never; Returns: string }
       is_in_couple: { Args: { _couple_id: string }; Returns: boolean }
     }

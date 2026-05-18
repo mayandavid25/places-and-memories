@@ -39,30 +39,18 @@ function OnboardingPage() {
   const createCouple = async () => {
     setBusy(true);
     try {
-      const { data: couple, error: cErr } = await supabase
-        .from("couples")
-        .insert({ name: profile?.display_name ?? null })
-        .select("id")
-        .single();
-      if (cErr) throw cErr;
-
-      const { error: pErr } = await supabase
-        .from("profiles")
-        .update({ couple_id: couple.id })
-        .eq("id", user.id);
-      if (pErr) throw pErr;
-
-      const inviteCode = genCode();
-      await supabase.from("couple_invites").insert({
-        code: inviteCode,
-        couple_id: couple.id,
-        created_by: user.id,
+      const { data, error } = await supabase.rpc("create_couple_with_invite", {
+        _name: profile?.display_name ?? undefined,
       });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row?.invite_code) throw new Error("Falha ao gerar código");
 
-      setGeneratedCode(inviteCode);
+      setGeneratedCode(row.invite_code as string);
       await refreshProfile();
       toast.success("Espaço criado!");
     } catch (err) {
+      console.error(err);
       toast.error(err instanceof Error ? err.message : "Erro");
     } finally {
       setBusy(false);
