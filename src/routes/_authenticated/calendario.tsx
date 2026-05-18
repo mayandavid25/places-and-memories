@@ -57,10 +57,20 @@ function CalendarPage() {
   const submit = async () => {
     if (!user || !coupleId || !title || !date) return;
     const { error } = await supabase.from("events").insert({
-      couple_id: coupleId, title, description: description || null, date, time: time || null, location: location || null, created_by: user.id,
-    });
+      couple_id: coupleId,
+      title,
+      description: description || null,
+      date,
+      time: time || null,
+      location: coords.formatted_address ?? location ?? null,
+      formatted_address: coords.formatted_address,
+      lat: coords.lat,
+      lng: coords.lng,
+      created_by: user.id,
+    } as never);
     if (error) return toast.error(error.message);
     setTitle(""); setTime(""); setLocation(""); setDescription("");
+    setCoords({ lat: null, lng: null, formatted_address: null });
     setOpen(false);
     qc.invalidateQueries({ queryKey: ["events"] });
   };
