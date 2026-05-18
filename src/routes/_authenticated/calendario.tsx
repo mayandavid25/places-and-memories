@@ -25,6 +25,7 @@ export const Route = createFileRoute("/_authenticated/calendario")({ component: 
 function CalendarPage() {
   const { user, profile } = useAuth();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const coupleId = profile?.couple_id;
   const [month, setMonth] = useState(new Date());
   const [open, setOpen] = useState(false);
@@ -32,6 +33,9 @@ function CalendarPage() {
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
+  const [coords, setCoords] = useState<{ lat: number | null; lng: number | null; formatted_address: string | null }>({
+    lat: null, lng: null, formatted_address: null,
+  });
   const [description, setDescription] = useState("");
 
   const { data: events } = useQuery({
