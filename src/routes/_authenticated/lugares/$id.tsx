@@ -31,7 +31,7 @@ function PlaceDetailPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("places")
-        .select("id, name, category, location, photos, favorited, visited_at, couple_id, created_by")
+        .select("id, name, category, location, formatted_address, lat, lng, photos, favorited, visited_at, couple_id, created_by")
         .eq("id", id)
         .single();
       if (error) throw error;
