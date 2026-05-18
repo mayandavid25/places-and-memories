@@ -67,10 +67,13 @@ function NovoLugarPage() {
           name,
           category,
           location: location || null,
+          formatted_address: coords.formatted_address,
+          lat: coords.lat,
+          lng: coords.lng,
           visited_at: visitedAt || null,
           photos,
           created_by: user.id,
-        })
+        } as never)
         .select("id")
         .single();
       if (error) throw error;
@@ -83,6 +86,22 @@ function NovoLugarPage() {
           comment: comment || null,
         });
       }
+
+      // Sync com calendário: cria evento vinculado quando há data da visita
+      if (visitedAt) {
+        await supabase.from("events").insert({
+          couple_id: coupleId,
+          created_by: user.id,
+          title: name,
+          date: visitedAt,
+          location: coords.formatted_address ?? location ?? null,
+          formatted_address: coords.formatted_address,
+          lat: coords.lat,
+          lng: coords.lng,
+          place_id: place.id,
+        } as never);
+      }
+
       toast.success("Lugar adicionado!");
       void navigate({ to: "/lugares/$id", params: { id: place.id } });
     } catch (err) {
