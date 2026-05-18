@@ -27,6 +27,9 @@ function NovoLugarPage() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState<PlaceCategory>("restaurante");
   const [location, setLocation] = useState("");
+  const [coords, setCoords] = useState<{ lat: number | null; lng: number | null; formatted_address: string | null }>({
+    lat: null, lng: null, formatted_address: null,
+  });
   const [visitedAt, setVisitedAt] = useState<string>("");
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
