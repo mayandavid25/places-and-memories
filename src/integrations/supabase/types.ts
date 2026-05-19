@@ -46,6 +46,32 @@ export type Database = {
           },
         ]
       }
+      couple_members: {
+        Row: {
+          couple_id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          couple_id: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          couple_id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "couple_members_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       couples: {
         Row: {
           created_at: string
@@ -406,8 +432,21 @@ export type Database = {
           invite_code: string
         }[]
       }
+      create_new_couple: {
+        Args: { _name?: string; _set_active?: boolean }
+        Returns: {
+          couple_id: string
+          invite_code: string
+        }[]
+      }
       current_couple_id: { Args: never; Returns: string }
       is_in_couple: { Args: { _couple_id: string }; Returns: boolean }
+      is_member_of: { Args: { _couple_id: string }; Returns: boolean }
+      join_couple_with_code: { Args: { _code: string }; Returns: string }
+      leave_couple: { Args: { _couple_id: string }; Returns: string }
+      regenerate_invite_code: { Args: { _couple_id: string }; Returns: string }
+      reset_couple_data: { Args: { _couple_id: string }; Returns: undefined }
+      set_active_couple: { Args: { _couple_id: string }; Returns: undefined }
     }
     Enums: {
       entertainment_status: "quero_consumir" | "consumindo" | "concluido"
