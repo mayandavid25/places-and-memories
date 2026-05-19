@@ -1,82 +1,89 @@
-# Nossos lugares e memórias
+## Plano: Sistema Multi-Board com Gerenciamento Completo
 
-App web responsivo (mobile-first) para casais registrarem lugares, memórias e planos juntos. Estética clean inspirada em Letterboxd + Pinterest, com paleta neutra e detalhes em rosa queimado / vinho claro.
+Transformar o sistema atual (1 usuário ↔ 1 couple via `profiles.couple_id`) em multi-board (N ↔ N) sem alterar UI/design, apenas adicionando seções novas na aba Perfil.
 
-## Stack
+---
 
-- TanStack Start + React + TailwindCSS (template atual)
-- Lovable Cloud (Supabase) para auth, banco e storage
-- Auth: Email/senha + Google (via broker Lovable) + recuperação de senha
-- shadcn/ui para componentes base
+### 1. Banco de Dados (migration)
 
-## Design system
+**Nova tabela `couple_members`** (relacionamento N↔N):
+- `couple_id uuid` (FK couples)
+- `user_id uuid`
+- `joined_at timestamptz default now()`
+- PK composta `(couple_id, user_id)`
+- RLS: usuário vê suas próprias membresias + membresias de boards onde participa
 
-- Paleta neutra (off-white, areia, carvão) + acento rosa queimado (`#B5654E` aprox) e vinho claro
-- Tipografia: serif elegante para títulos (Instrument Serif / Cormorant), sans minimalista para corpo (Inter / Work Sans)
-- Cantos arredondados generosos (rounded-2xl), bastante whitespace
-- Dark mode opcional (toggle no perfil)
-- Animações sutis (fade/slide) com tailwindcss-animate
-- Tokens semânticos em `src/styles.css` (oklch) — sem cores hardcoded
+**`profiles.couple_id`** continua existindo como **"board ativo"** (compatibilidade total com código atual). Nenhum dado é apagado.
 
-## Estrutura de rotas
+**Migração de dados**: para todo `profiles` com `couple_id` não-nulo, inserir linha em `couple_members` (idempotente, `ON CONFLICT DO NOTHING`).
 
-```
-src/routes/
-  __root.tsx            shell + QueryClient + auth listener + theme
-  index.tsx             redirect para /login ou /home
-  login.tsx             tela de login/cadastro/reset (pública)
-  reset-password.tsx    fluxo de recuperação
-  _authenticated.tsx    layout protegido (sidebar desktop + bottom nav mobile)
-    home.tsx
-    lugares.tsx         lista + filtros + busca
-    lugares.$id.tsx     detalhe + avaliações dos dois
-    lugares.novo.tsx
-    wishlist.tsx
-    ranking.tsx
-    entretenimento.tsx           tabs: filmes / séries / jogos / livros
-    calendario.tsx
-    perfil.tsx
-```
+**Atualizar `is_in_couple()`** para checar `couple_members` (em vez de `profiles.couple_id`) — assim usuário acessa dados de qualquer board do qual é membro, mas `current_couple_id()` retorna apenas o ativo.
 
-## Schema do banco (Lovable Cloud)
+**Novas funções RPC**:
+- `create_new_couple(_name text)` — cria couple + invite + insere em `couple_members` + opcionalmente define como ativo
+- `join_couple_with_code(_code text)` — valida código, insere em `couple_members`, define como ativo
+- `set_active_couple(_couple_id uuid)` — valida membresia, atualiza `profiles.couple_id`
+- `regenerate_invite_code(_couple_id uuid)` — invalida códigos antigos (não-usados) e cria novo
+- `leave_couple(_couple_id uuid)` — remove membresia; se era o ativo, define outro como ativo (ou null)
+- `reset_couple_data(_couple_id uuid)` — DELETE em places, wishlist_items, events, entertainment_items, e suas reviews, do board específico
+- `delete_user_account()` — remove membresias do usuário; chama `auth.admin.deleteUser` via serverFn separada (RPC não tem acesso); aqui apenas limpa dados pessoais
 
-- `profiles` (id → auth.users, username, display_name, avatar_url, couple_id)
-- `couples` (id, created_at) — duas pessoas compartilham um `couple_id`
-- `couple_invites` (code, couple_id, expires_at) — primeiro usuário cria o casal, segundo entra com código
-- `places` (id, couple_id, name, category[restaurante|café|bar|viagem], location, visited_at, photos[], created_by, favorited, created_at)
-- `place_reviews` (id, place_id, user_id, rating 1-5, comment, created_at) — uma por usuário por lugar
-- `wishlist_items` (id, couple_id, name, category, note, priority, status, created_by)
-- `entertainment_items` (id, couple_id, type[filme|série|jogo|livro], title, cover_url, status, created_by)
-- `entertainment_reviews` (id, item_id, user_id, rating, comment)
-- `events` (id, couple_id, title, description, date, time, location, status, created_by)
-- Storage bucket `photos` (público) para fotos de lugares, capas e avatares
+**Atualizar policies** em couples (SELECT/UPDATE) e couple_invites para usar `couple_members` ao invés de `is_in_couple` baseado em `profiles.couple_id`. Comportamento idêntico para usuários atuais (que já têm 1 board).
 
-RLS: tudo restrito por `couple_id == (select couple_id from profiles where id = auth.uid())`. `has_couple_access(couple_id)` security definer para evitar recursão.
+---
 
-## Telas (resumo)
+### 2. Server Function
 
-- **Login**: card centralizado, frase em itálico ("Só é preciso encontrar alguém por quem ter coragem" — Devoradores de estrelas), email/senha, Entrar, Criar conta, Entrar com Google, link "Esqueci minha senha".
-- **Onboarding casal**: após cadastro, criar casal ou colar código de convite do parceiro.
-- **Home**: grid Pinterest com últimos lugares, próximos eventos, top 3 do ranking, últimos comentários.
-- **Lugares**: grid de cards com foto, nota média, badges; filtros por categoria/nota; busca; FAB para adicionar. Detalhe mostra duas avaliações lado a lado (avatar + nota + comentário de cada um).
-- **Wishlist**: lista agrupada por status com prioridade visual.
-- **Ranking**: 4 seções (restaurantes/cafés/bares/viagens) ordenadas por média ponderada.
-- **Entretenimento**: tabs estilo Letterboxd, grid de capas, status pill.
-- **Calendário**: visão mensal + lista de próximos; destaque para datas especiais.
-- **Perfil**: avatar, nome, stats (lugares adicionados, avaliações, favoritos), toggle dark mode, logout.
+`src/lib/account.functions.ts`:
+- `deleteAccount` (createServerFn + requireSupabaseAuth) — usa `supabaseAdmin.auth.admin.deleteUser(userId)` após limpar membresias.
 
-## Navegação
+Registrar `attachSupabaseAuth` em `src/start.ts` se ainda não estiver.
 
-- Mobile: bottom nav com 5 itens principais (Home, Lugares, Wishlist, Calendário, Perfil) + acesso a Ranking/Entretenimento via Home/menu
-- Desktop: sidebar shadcn colapsável com todos os 7 itens
+---
 
-## Entregáveis por fase
+### 3. UI — apenas Perfil
 
-1. **Setup**: ativar Lovable Cloud, design tokens, layout autenticado, bottom nav + sidebar
-2. **Auth**: login/cadastro/Google/reset + onboarding de casal
-3. **Lugares + Wishlist + Ranking** (núcleo)
-4. **Entretenimento**
-5. **Calendário**
-6. **Perfil + dark mode + polish**
+Editar **somente** `src/routes/_authenticated/perfil.tsx`. Adicionar três seções novas abaixo do card existente, reusando os tokens/estilos atuais (`rounded-3xl border border-border bg-card`, `Button`, `Input`, `Dialog`):
 
-Aprove para eu começar pela fase 1 (setup + auth + estrutura de navegação).
+**a) "Convidar parceiro/a"**
+- Mostra código atual do board ativo (busca `couple_invites` mais recente não-usado, ou regenera se nenhum)
+- Botão "Copiar código" (clipboard + toast)
+- Botão "Compartilhar" (Web Share API com fallback para copiar)
+- Botão "Gerar novo código"
+- Instrução curta abaixo
+
+**b) "Meus espaços"**
+- Lista todos os boards via `couple_members` join `couples` + count de membros
+- Cada item: nome, código atual, nº participantes, data criação, botão "Tornar ativo" (ou badge "Ativo")
+- Botão "Entrar em outro espaço" (modal com input de código → `join_couple_with_code`)
+- Botão "Criar novo espaço" (modal com nome → `create_new_couple`)
+- Botão "Sair deste espaço" (com dupla confirmação)
+
+**c) "Zona de risco"**
+- "Resetar espaço atual" — dupla confirmação → `reset_couple_data`
+- "Excluir conta" — dupla confirmação → serverFn `deleteAccount` → signOut → redirect `/login`
+- Botão "Sair" já existe; manter
+
+**Componente `ConfirmDialog`** reutilizável (em `src/components/confirm-dialog.tsx`) implementando o fluxo de dupla confirmação (primeiro "Tem certeza?", depois "Ação irreversível"). Visual usa shadcn `Dialog` + tokens existentes — zero CSS novo.
+
+---
+
+### 4. Invalidação e troca de board
+
+Após `set_active_couple`: `queryClient.invalidateQueries()` + `refreshProfile()` — toda a app reflete o novo board sem reload (já que tudo filtra por `profile.couple_id`).
+
+---
+
+### Arquivos a editar/criar
+
+- `supabase/migrations/<new>.sql` (tabela, policies, funções, migração de dados)
+- `src/lib/account.functions.ts` (novo)
+- `src/start.ts` (verificar middleware)
+- `src/components/confirm-dialog.tsx` (novo)
+- `src/routes/_authenticated/perfil.tsx` (editar — adicionar seções; preservar tudo existente)
+
+### Fora de escopo (não tocar)
+
+- Calendário, Wishlist, Lugares, Entretenimento, Home, Ranking — nenhuma alteração
+- Estilos globais, tokens, tipografia — nenhuma alteração
+- Onboarding existente — continua funcionando (cria primeiro board via fluxo atual)
