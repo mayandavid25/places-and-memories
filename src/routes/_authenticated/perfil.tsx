@@ -494,7 +494,7 @@ function PerfilPage() {
         description="Todas as lembranças, wishlist, eventos e entretenimento serão apagados deste espaço."
         finalDescription="Esta ação não pode ser desfeita. Continuar?"
         confirmLabel="Resetar"
-        onConfirm={resetCurrent}
+        onConfirm={async () => { await resetCurrent(); }}
       />
 
       <ConfirmDialog
@@ -504,7 +504,7 @@ function PerfilPage() {
         description="Suas participações em espaços e seu perfil serão removidos."
         finalDescription="Esta ação é permanente e não pode ser desfeita. Continuar?"
         confirmLabel="Excluir conta"
-        onConfirm={doDelete}
+        onConfirm={async () => { await doDelete(); }}
       />
 
       <ConfirmDialog
