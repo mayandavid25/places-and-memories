@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticated/wishlist'
+import { Route as AuthenticatedReceitasRouteImport } from './routes/_authenticated/receitas'
 import { Route as AuthenticatedRankingRouteImport } from './routes/_authenticated/ranking'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
@@ -51,6 +52,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthenticatedWishlistRoute = AuthenticatedWishlistRouteImport.update({
   id: '/wishlist',
   path: '/wishlist',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedReceitasRoute = AuthenticatedReceitasRouteImport.update({
+  id: '/receitas',
+  path: '/receitas',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedRankingRoute = AuthenticatedRankingRouteImport.update({
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof AuthenticatedHomeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/ranking': typeof AuthenticatedRankingRoute
+  '/receitas': typeof AuthenticatedReceitasRoute
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/lugares/$id': typeof AuthenticatedLugaresIdRoute
   '/lugares/novo': typeof AuthenticatedLugaresNovoRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/home': typeof AuthenticatedHomeRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/ranking': typeof AuthenticatedRankingRoute
+  '/receitas': typeof AuthenticatedReceitasRoute
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/lugares/$id': typeof AuthenticatedLugaresIdRoute
   '/lugares/novo': typeof AuthenticatedLugaresNovoRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/ranking': typeof AuthenticatedRankingRoute
+  '/_authenticated/receitas': typeof AuthenticatedReceitasRoute
   '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/_authenticated/lugares/$id': typeof AuthenticatedLugaresIdRoute
   '/_authenticated/lugares/novo': typeof AuthenticatedLugaresNovoRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/perfil'
     | '/ranking'
+    | '/receitas'
     | '/wishlist'
     | '/lugares/$id'
     | '/lugares/novo'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/perfil'
     | '/ranking'
+    | '/receitas'
     | '/wishlist'
     | '/lugares/$id'
     | '/lugares/novo'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/_authenticated/home'
     | '/_authenticated/perfil'
     | '/_authenticated/ranking'
+    | '/_authenticated/receitas'
     | '/_authenticated/wishlist'
     | '/_authenticated/lugares/$id'
     | '/_authenticated/lugares/novo'
@@ -243,6 +255,13 @@ declare module '@tanstack/react-router' {
       path: '/wishlist'
       fullPath: '/wishlist'
       preLoaderRoute: typeof AuthenticatedWishlistRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/receitas': {
+      id: '/_authenticated/receitas'
+      path: '/receitas'
+      fullPath: '/receitas'
+      preLoaderRoute: typeof AuthenticatedReceitasRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/ranking': {
@@ -310,6 +329,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedRankingRoute: typeof AuthenticatedRankingRoute
+  AuthenticatedReceitasRoute: typeof AuthenticatedReceitasRoute
   AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
   AuthenticatedLugaresIdRoute: typeof AuthenticatedLugaresIdRoute
   AuthenticatedLugaresNovoRoute: typeof AuthenticatedLugaresNovoRoute
@@ -322,6 +342,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedRankingRoute: AuthenticatedRankingRoute,
+  AuthenticatedReceitasRoute: AuthenticatedReceitasRoute,
   AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
   AuthenticatedLugaresIdRoute: AuthenticatedLugaresIdRoute,
   AuthenticatedLugaresNovoRoute: AuthenticatedLugaresNovoRoute,
