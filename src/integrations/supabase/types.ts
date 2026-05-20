@@ -96,30 +96,48 @@ export type Database = {
           cover_url: string | null
           created_at: string
           created_by: string
+          description: string | null
           id: string
+          progress_current: number | null
+          progress_note: string | null
+          progress_total: number | null
+          progress_unit: string | null
           status: Database["public"]["Enums"]["entertainment_status"]
           title: string
           type: Database["public"]["Enums"]["entertainment_type"]
+          updated_at: string
         }
         Insert: {
           couple_id: string
           cover_url?: string | null
           created_at?: string
           created_by: string
+          description?: string | null
           id?: string
+          progress_current?: number | null
+          progress_note?: string | null
+          progress_total?: number | null
+          progress_unit?: string | null
           status?: Database["public"]["Enums"]["entertainment_status"]
           title: string
           type: Database["public"]["Enums"]["entertainment_type"]
+          updated_at?: string
         }
         Update: {
           couple_id?: string
           cover_url?: string | null
           created_at?: string
           created_by?: string
+          description?: string | null
           id?: string
+          progress_current?: number | null
+          progress_note?: string | null
+          progress_total?: number | null
+          progress_unit?: string | null
           status?: Database["public"]["Enums"]["entertainment_status"]
           title?: string
           type?: Database["public"]["Enums"]["entertainment_type"]
+          updated_at?: string
         }
         Relationships: [
           {
@@ -358,6 +376,115 @@ export type Database = {
           },
         ]
       }
+      recipe_comments: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          recipe_id: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          recipe_id: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          recipe_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_comments_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipe_ingredients: {
+        Row: {
+          checked: boolean
+          created_at: string
+          id: string
+          position: number
+          recipe_id: string
+          text: string
+        }
+        Insert: {
+          checked?: boolean
+          created_at?: string
+          id?: string
+          position?: number
+          recipe_id: string
+          text: string
+        }
+        Update: {
+          checked?: boolean
+          created_at?: string
+          id?: string
+          position?: number
+          recipe_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_ingredients_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipes: {
+        Row: {
+          category: Database["public"]["Enums"]["recipe_category"] | null
+          couple_id: string
+          cover_url: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          photos: string[]
+          planned_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["recipe_category"] | null
+          couple_id: string
+          cover_url?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          photos?: string[]
+          planned_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["recipe_category"] | null
+          couple_id?: string
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          photos?: string[]
+          planned_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       wishlist_items: {
         Row: {
           category: Database["public"]["Enums"]["place_category"] | null
@@ -452,7 +579,15 @@ export type Database = {
       entertainment_status: "quero_consumir" | "consumindo" | "concluido"
       entertainment_type: "filme" | "serie" | "jogo" | "livro"
       event_status: "futuro" | "aconteceu" | "cancelado"
-      place_category: "restaurante" | "cafe" | "bar" | "viagem"
+      place_category: "restaurante" | "cafe" | "bar" | "viagem" | "diversao"
+      recipe_category:
+        | "cafe_da_manha"
+        | "almoco"
+        | "jantar"
+        | "sobremesa"
+        | "lanche"
+        | "drinks"
+        | "outros"
       wishlist_status: "queremos_visitar" | "planejado" | "visitado"
     }
     CompositeTypes: {
@@ -584,7 +719,16 @@ export const Constants = {
       entertainment_status: ["quero_consumir", "consumindo", "concluido"],
       entertainment_type: ["filme", "serie", "jogo", "livro"],
       event_status: ["futuro", "aconteceu", "cancelado"],
-      place_category: ["restaurante", "cafe", "bar", "viagem"],
+      place_category: ["restaurante", "cafe", "bar", "viagem", "diversao"],
+      recipe_category: [
+        "cafe_da_manha",
+        "almoco",
+        "jantar",
+        "sobremesa",
+        "lanche",
+        "drinks",
+        "outros",
+      ],
       wishlist_status: ["queremos_visitar", "planejado", "visitado"],
     },
   },
