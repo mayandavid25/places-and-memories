@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, useNavigate, Link, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Home, MapPin, Heart, Trophy, Tv, Calendar, User, Menu } from "lucide-react";
+import { Home, MapPin, Heart, Trophy, Tv, Calendar, User, Menu, ChefHat } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -12,13 +12,14 @@ const navItems = [
   { to: "/home", label: "Home", icon: Home },
   { to: "/lugares", label: "Lugares", icon: MapPin },
   { to: "/wishlist", label: "Wishlist", icon: Heart },
+  { to: "/receitas", label: "Receitas", icon: ChefHat },
   { to: "/ranking", label: "Ranking", icon: Trophy },
   { to: "/entretenimento", label: "Entretenimento", icon: Tv },
   { to: "/calendario", label: "Calendário", icon: Calendar },
   { to: "/perfil", label: "Perfil", icon: User },
 ] as const;
 
-const mobileNav = navItems.filter((i) => ["/home", "/lugares", "/wishlist", "/calendario", "/perfil"].includes(i.to));
+const mobileNav = navItems.filter((i) => ["/home", "/lugares", "/receitas", "/calendario", "/perfil"].includes(i.to));
 
 function AuthenticatedLayout() {
   const { user, profile, loading } = useAuth();

@@ -1,89 +1,83 @@
-## Plano: Sistema Multi-Board com Gerenciamento Completo
+## Plano: Receitas (nova aba), Lugares (edição + categoria) e Entretenimento (detalhes + progresso)
 
-Transformar o sistema atual (1 usuário ↔ 1 couple via `profiles.couple_id`) em multi-board (N ↔ N) sem alterar UI/design, apenas adicionando seções novas na aba Perfil.
-
----
-
-### 1. Banco de Dados (migration)
-
-**Nova tabela `couple_members`** (relacionamento N↔N):
-- `couple_id uuid` (FK couples)
-- `user_id uuid`
-- `joined_at timestamptz default now()`
-- PK composta `(couple_id, user_id)`
-- RLS: usuário vê suas próprias membresias + membresias de boards onde participa
-
-**`profiles.couple_id`** continua existindo como **"board ativo"** (compatibilidade total com código atual). Nenhum dado é apagado.
-
-**Migração de dados**: para todo `profiles` com `couple_id` não-nulo, inserir linha em `couple_members` (idempotente, `ON CONFLICT DO NOTHING`).
-
-**Atualizar `is_in_couple()`** para checar `couple_members` (em vez de `profiles.couple_id`) — assim usuário acessa dados de qualquer board do qual é membro, mas `current_couple_id()` retorna apenas o ativo.
-
-**Novas funções RPC**:
-- `create_new_couple(_name text)` — cria couple + invite + insere em `couple_members` + opcionalmente define como ativo
-- `join_couple_with_code(_code text)` — valida código, insere em `couple_members`, define como ativo
-- `set_active_couple(_couple_id uuid)` — valida membresia, atualiza `profiles.couple_id`
-- `regenerate_invite_code(_couple_id uuid)` — invalida códigos antigos (não-usados) e cria novo
-- `leave_couple(_couple_id uuid)` — remove membresia; se era o ativo, define outro como ativo (ou null)
-- `reset_couple_data(_couple_id uuid)` — DELETE em places, wishlist_items, events, entertainment_items, e suas reviews, do board específico
-- `delete_user_account()` — remove membresias do usuário; chama `auth.admin.deleteUser` via serverFn separada (RPC não tem acesso); aqui apenas limpa dados pessoais
-
-**Atualizar policies** em couples (SELECT/UPDATE) e couple_invites para usar `couple_members` ao invés de `is_in_couple` baseado em `profiles.couple_id`. Comportamento idêntico para usuários atuais (que já têm 1 board).
+Três áreas independentes, todas preservando o visual atual (tokens, `rounded-3xl border border-border bg-card`, `Instrument Serif` + `Inter`, paleta existente). Zero alteração em `styles.css`, navegação, home, calendário, wishlist ou perfil — exceto adicionar o link de Receitas na navegação principal (mesmo padrão dos outros itens).
 
 ---
 
-### 2. Server Function
+### 1. RECEITAS (nova aba)
 
-`src/lib/account.functions.ts`:
-- `deleteAccount` (createServerFn + requireSupabaseAuth) — usa `supabaseAdmin.auth.admin.deleteUser(userId)` após limpar membresias.
+**Banco (migration única):**
 
-Registrar `attachSupabaseAuth` em `src/start.ts` se ainda não estiver.
+- `recipes` — `id`, `couple_id`, `name`, `description`, `category` (enum `recipe_category`: cafe_da_manha, almoco, jantar, sobremesa, lanche, drinks, outros — nullable), `cover_url`, `photos text[]`, `planned_date date`, `created_by`, `created_at`, `updated_at`.
+- `recipe_ingredients` — `id`, `recipe_id`, `text`, `checked bool`, `position int`, `created_at`. Cascade delete.
+- `recipe_comments` — `id`, `recipe_id`, `user_id`, `comment text`, `created_at`.
+- RLS espelhando `places`/`wishlist_items`: `is_in_couple(couple_id)` + insert exige `created_by = auth.uid()`. Para ingredientes/comentários, usa subquery via `recipes`.
+- Storage: reaproveita bucket `photos` (já privado, já assinado).
 
----
+**Categorias:** adicionar em `src/lib/categories.ts` (`RECIPE_CATEGORIES`, `RECIPE_CATEGORY_LABEL`).
 
-### 3. UI — apenas Perfil
+**Rotas:**
+- `src/routes/_authenticated/receitas.tsx` — lista (cards igual aos de Lugares/Wishlist), filtro por categoria, busca, botão "Nova receita" → abre modal de criação. Click no card abre modal de detalhes/edição com:
+  - foto destaque + galeria (upload/remover via storage), nome, categoria, descrição, data, checklist de ingredientes (input inline para adicionar, checkbox para marcar, X para remover, autosave debounced), comentários (lista + input).
+  - mesmo padrão de `Dialog` shadcn já usado.
 
-Editar **somente** `src/routes/_authenticated/perfil.tsx`. Adicionar três seções novas abaixo do card existente, reusando os tokens/estilos atuais (`rounded-3xl border border-border bg-card`, `Button`, `Input`, `Dialog`):
-
-**a) "Convidar parceiro/a"**
-- Mostra código atual do board ativo (busca `couple_invites` mais recente não-usado, ou regenera se nenhum)
-- Botão "Copiar código" (clipboard + toast)
-- Botão "Compartilhar" (Web Share API com fallback para copiar)
-- Botão "Gerar novo código"
-- Instrução curta abaixo
-
-**b) "Meus espaços"**
-- Lista todos os boards via `couple_members` join `couples` + count de membros
-- Cada item: nome, código atual, nº participantes, data criação, botão "Tornar ativo" (ou badge "Ativo")
-- Botão "Entrar em outro espaço" (modal com input de código → `join_couple_with_code`)
-- Botão "Criar novo espaço" (modal com nome → `create_new_couple`)
-- Botão "Sair deste espaço" (com dupla confirmação)
-
-**c) "Zona de risco"**
-- "Resetar espaço atual" — dupla confirmação → `reset_couple_data`
-- "Excluir conta" — dupla confirmação → serverFn `deleteAccount` → signOut → redirect `/login`
-- Botão "Sair" já existe; manter
-
-**Componente `ConfirmDialog`** reutilizável (em `src/components/confirm-dialog.tsx`) implementando o fluxo de dupla confirmação (primeiro "Tem certeza?", depois "Ação irreversível"). Visual usa shadcn `Dialog` + tokens existentes — zero CSS novo.
+**Navegação:** adicionar item "Receitas" no nav principal (mesmo componente que abriga Lugares/Calendário/Wishlist/Entretenimento — preservando exatamente o estilo dos demais itens).
 
 ---
 
-### 4. Invalidação e troca de board
+### 2. LUGARES
 
-Após `set_active_couple`: `queryClient.invalidateQueries()` + `refreshProfile()` — toda a app reflete o novo board sem reload (já que tudo filtra por `profile.couple_id`).
+**Banco (migration):**
+- Adicionar valor `'diversao'` ao enum `place_category`.
+- Atualizar `src/lib/categories.ts`: incluir `"diversao"` em `CATEGORIES`, labels "Diversão"/"Diversões".
+
+**UI:**
+- `src/routes/_authenticated/lugares/index.tsx` — adicionar filtro Diversão (gerado pela lista de categorias, sem hardcode).
+- `src/routes/_authenticated/lugares/$id.tsx` — converter a página atual em **modo edição inline** dentro de um modal elegante:
+  - clicar no card da lista abre `Dialog` (em vez de navegar) com todos os campos editáveis: nome, categoria, nota (estrelas), comentário, endereço (PlaceAutocomplete já existe), data (visited_at), status (favoritado), upload/remover fotos.
+  - manter rota `$id.tsx` funcional como fallback (deep link), reusando o mesmo componente de detalhes.
+- Upload de fotos pós-criação: botão "Adicionar fotos" → faz upload no bucket `photos` e dá `UPDATE places SET photos = array_append(...)`.
+- Remover foto: `array_remove` + delete do arquivo no storage.
+- Ranking (`ranking.tsx`): incluir nova categoria automaticamente se gerado por `CATEGORIES`.
 
 ---
 
-### Arquivos a editar/criar
+### 3. ENTRETENIMENTO
 
-- `supabase/migrations/<new>.sql` (tabela, policies, funções, migração de dados)
-- `src/lib/account.functions.ts` (novo)
-- `src/start.ts` (verificar middleware)
-- `src/components/confirm-dialog.tsx` (novo)
-- `src/routes/_authenticated/perfil.tsx` (editar — adicionar seções; preservar tudo existente)
+**Banco (migration):**
+- `entertainment_items` adicionar colunas: `description text`, `progress_current int`, `progress_total int`, `progress_unit text` (free: "min", "ep", "temp", "cap"), `progress_note text`, `updated_at`.
+- Renomear/usar `cover_url` (já existe).
 
-### Fora de escopo (não tocar)
+**Storage:** bucket `photos` para capas.
 
-- Calendário, Wishlist, Lugares, Entretenimento, Home, Ranking — nenhuma alteração
-- Estilos globais, tokens, tipografia — nenhuma alteração
-- Onboarding existente — continua funcionando (cria primeiro board via fluxo atual)
+**UI:** `src/routes/_authenticated/entretenimento.tsx`
+- Cards passam a mostrar capa (16:9 ou 2:3 para filme/série/livro, 16:9 para jogo) com fallback elegante quando ausente — usando `bg-muted` e ícone.
+- Agrupar lista em 3 seções colapsadas/visíveis por status: **Quero ver**, **Em andamento**, **Concluído**. Mantém abas de tipo existentes.
+- Click no card → `Dialog` com:
+  - upload de capa (substituir / remover)
+  - editar título, tipo, descrição, status
+  - nota (StarRating já existe) + comentário (via `entertainment_reviews`)
+  - se status = `consumindo`: bloco "Progresso" com `progress_current/progress_total/unit/note` (e atalhos por tipo: filme → minutos; série → temporada/episódio; livro → capítulo/página; jogo → horas).
+  - histórico de comentários (lista de reviews existentes).
+
+---
+
+### Arquivos
+
+**Migrations**
+- `supabase/migrations/<ts>_recipes.sql`
+- `supabase/migrations/<ts>_places_diversao.sql`
+- `supabase/migrations/<ts>_entertainment_progress.sql`
+
+**Novos**
+- `src/routes/_authenticated/receitas.tsx`
+
+**Editados**
+- `src/lib/categories.ts` (Diversão + Recipes)
+- componente de navegação principal (adicionar item Receitas)
+- `src/routes/_authenticated/lugares/index.tsx` (modal de detalhes/edição no click)
+- `src/routes/_authenticated/lugares/$id.tsx` (reusa modo edição)
+- `src/routes/_authenticated/entretenimento.tsx` (capas, seções por status, modal detalhes + progresso)
+
+### Fora de escopo
+- Calendário, Wishlist, Perfil, Home, Onboarding, Ranking estrutural, estilos globais, integrações novas. APIs externas de capas/posters não serão usadas (apenas upload manual conforme pedido).
