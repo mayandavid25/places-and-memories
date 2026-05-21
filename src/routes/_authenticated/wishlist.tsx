@@ -170,8 +170,12 @@ function WishlistRow({
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">{item.name}</p>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+            {item.is_private && (
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-muted px-1.5 py-0.5 text-[10px]">
+                <Lock className="h-2.5 w-2.5" /> privado
+              </span>
+            )}
             {item.category && <span className="capitalize">{CATEGORY_LABEL[item.category as never]}</span>}
-            {item.planned_date && (
               <span className="inline-flex items-center gap-1">
                 <CalendarIcon className="h-3 w-3" />
                 {format(new Date(item.planned_date + "T00:00"), "d MMM yyyy", { locale: ptBR })}
