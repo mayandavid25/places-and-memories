@@ -394,6 +394,17 @@ function WishlistFormDialog({
           </div>
         </div>
 
+        <div className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2">
+          <div className="flex items-center gap-2">
+            <Lock className="h-4 w-4 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-medium">Privado</p>
+              <p className="text-[11px] text-muted-foreground">Só você verá este item — ideal para surpresas.</p>
+            </div>
+          </div>
+          <Switch checked={isPrivate} onCheckedChange={setIsPrivate} />
+        </div>
+
         <div className="flex gap-2 pt-2">
           {mode === "edit" && onDelete && (
             <Button type="button" variant="outline" onClick={onDelete} className="rounded-xl text-destructive hover:text-destructive">
