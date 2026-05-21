@@ -230,6 +230,7 @@ function WishlistFormDialog({
   });
   const [note, setNote] = useState(item?.note ?? "");
   const [photos, setPhotos] = useState<string[]>(item?.photos ?? []);
+  const [isPrivate, setIsPrivate] = useState<boolean>(item?.is_private ?? false);
   const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -244,6 +245,7 @@ function WishlistFormDialog({
       setCoords({ lat: item.lat ?? null, lng: item.lng ?? null, formatted_address: item.formatted_address ?? null });
       setNote(item.note ?? "");
       setPhotos(item.photos ?? []);
+      setIsPrivate(item.is_private ?? false);
     }
   }, [item]);
 
@@ -281,6 +283,7 @@ function WishlistFormDialog({
         lng: coords.lng,
         note: note.trim() || null,
         photos,
+        is_private: isPrivate,
       } as never;
       if (mode === "create") {
         const { error } = await supabase.from("wishlist_items").insert({
