@@ -128,20 +128,20 @@ function EntList({ type }: { type: EntertainmentType }) {
 
   return (
     <>
-      <div className="mb-6 flex gap-2">
-        <Input
-          placeholder={`Adicionar ${ENT_LABEL[type].toLowerCase().slice(0, -1)}...`}
+      <div className="mb-6 flex items-center gap-2">
+        {pendingCover && (
+          <div className="h-12 w-9 shrink-0 overflow-hidden rounded-md bg-muted">
+            <img src={pendingCover} alt="" className="h-full w-full object-cover" />
+          </div>
+        )}
+        <CoverSearchInput
+          type={type}
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              void add();
-            }
-          }}
-          className="h-10 rounded-xl"
+          onChange={(v) => { setTitle(v); if (!v) setPendingCover(null); }}
+          onPick={(r) => { setTitle(r.title); setPendingCover(r.cover_url); }}
+          placeholder={`Adicionar ${ENT_LABEL[type].toLowerCase().slice(0, -1)}...`}
         />
-        <Button onClick={add} className="rounded-xl">
+        <Button onClick={add} disabled={!title} className="rounded-xl">
           <Plus className="h-4 w-4" />
         </Button>
       </div>
