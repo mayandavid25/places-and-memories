@@ -176,6 +176,7 @@ function WishlistRow({
               </span>
             )}
             {item.category && <span className="capitalize">{CATEGORY_LABEL[item.category as never]}</span>}
+            {item.planned_date && (
               <span className="inline-flex items-center gap-1">
                 <CalendarIcon className="h-3 w-3" />
                 {format(new Date(item.planned_date + "T00:00"), "d MMM yyyy", { locale: ptBR })}
