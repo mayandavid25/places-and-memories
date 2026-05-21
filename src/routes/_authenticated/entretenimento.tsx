@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { CoverSearchInput } from "@/components/cover-search-input";
 
 export const Route = createFileRoute("/_authenticated/entretenimento")({
   component: EntertainmentPage,
@@ -82,6 +83,7 @@ function EntList({ type }: { type: EntertainmentType }) {
   const qc = useQueryClient();
   const coupleId = profile?.couple_id;
   const [title, setTitle] = useState("");
+  const [pendingCover, setPendingCover] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
 
   const { data } = useQuery({
@@ -106,10 +108,12 @@ function EntList({ type }: { type: EntertainmentType }) {
       couple_id: coupleId,
       type,
       title,
+      cover_url: pendingCover,
       created_by: user.id,
     });
     if (error) return toast.error(error.message);
     setTitle("");
+    setPendingCover(null);
     qc.invalidateQueries({ queryKey: ["ent"] });
   };
 
