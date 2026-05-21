@@ -186,6 +186,7 @@ export type Database = {
       }
       events: {
         Row: {
+          category: string | null
           couple_id: string
           created_at: string
           created_by: string
@@ -196,12 +197,17 @@ export type Database = {
           lat: number | null
           lng: number | null
           location: string | null
+          notes: string | null
+          participants: string[]
+          photos: string[]
           place_id: string | null
           status: Database["public"]["Enums"]["event_status"]
+          tags: string[]
           time: string | null
           title: string
         }
         Insert: {
+          category?: string | null
           couple_id: string
           created_at?: string
           created_by: string
@@ -212,12 +218,17 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           location?: string | null
+          notes?: string | null
+          participants?: string[]
+          photos?: string[]
           place_id?: string | null
           status?: Database["public"]["Enums"]["event_status"]
+          tags?: string[]
           time?: string | null
           title: string
         }
         Update: {
+          category?: string | null
           couple_id?: string
           created_at?: string
           created_by?: string
@@ -228,8 +239,12 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           location?: string | null
+          notes?: string | null
+          participants?: string[]
+          photos?: string[]
           place_id?: string | null
           status?: Database["public"]["Enums"]["event_status"]
+          tags?: string[]
           time?: string | null
           title?: string
         }
@@ -493,7 +508,9 @@ export type Database = {
           created_by: string
           formatted_address: string | null
           id: string
+          is_private: boolean
           lat: number | null
+          linked_place_id: string | null
           lng: number | null
           location: string | null
           name: string
@@ -510,7 +527,9 @@ export type Database = {
           created_by: string
           formatted_address?: string | null
           id?: string
+          is_private?: boolean
           lat?: number | null
+          linked_place_id?: string | null
           lng?: number | null
           location?: string | null
           name: string
@@ -527,7 +546,9 @@ export type Database = {
           created_by?: string
           formatted_address?: string | null
           id?: string
+          is_private?: boolean
           lat?: number | null
+          linked_place_id?: string | null
           lng?: number | null
           location?: string | null
           name?: string
