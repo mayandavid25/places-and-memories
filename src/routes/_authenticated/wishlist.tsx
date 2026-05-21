@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Trash2, Upload, X, MapPin, Calendar as CalendarIcon } from "lucide-react";
+import { Plus, Trash2, Upload, X, MapPin, Calendar as CalendarIcon, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -37,6 +38,8 @@ type WishlistItem = {
   lat: number | null;
   lng: number | null;
   photos: string[];
+  is_private: boolean;
+  linked_place_id: string | null;
   created_at: string;
 };
 
@@ -69,7 +72,9 @@ function WishlistPage() {
   const setStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("wishlist_items").update({ status: status as never }).eq("id", id);
     if (error) return toast.error(error.message);
+    if (status === "visitado") toast.success("Marcado como visitado — adicionado em Lugares ✨");
     qc.invalidateQueries({ queryKey: ["wishlist"] });
+    qc.invalidateQueries({ queryKey: ["places"] });
   };
 
   const remove = async (id: string) => {
@@ -165,6 +170,11 @@ function WishlistRow({
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">{item.name}</p>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+            {item.is_private && (
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-muted px-1.5 py-0.5 text-[10px]">
+                <Lock className="h-2.5 w-2.5" /> privado
+              </span>
+            )}
             {item.category && <span className="capitalize">{CATEGORY_LABEL[item.category as never]}</span>}
             {item.planned_date && (
               <span className="inline-flex items-center gap-1">
@@ -220,6 +230,7 @@ function WishlistFormDialog({
   });
   const [note, setNote] = useState(item?.note ?? "");
   const [photos, setPhotos] = useState<string[]>(item?.photos ?? []);
+  const [isPrivate, setIsPrivate] = useState<boolean>(item?.is_private ?? false);
   const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -234,6 +245,7 @@ function WishlistFormDialog({
       setCoords({ lat: item.lat ?? null, lng: item.lng ?? null, formatted_address: item.formatted_address ?? null });
       setNote(item.note ?? "");
       setPhotos(item.photos ?? []);
+      setIsPrivate(item.is_private ?? false);
     }
   }, [item]);
 
@@ -271,6 +283,7 @@ function WishlistFormDialog({
         lng: coords.lng,
         note: note.trim() || null,
         photos,
+        is_private: isPrivate,
       } as never;
       if (mode === "create") {
         const { error } = await supabase.from("wishlist_items").insert({
@@ -379,6 +392,17 @@ function WishlistFormDialog({
               <Upload className="h-4 w-4" />
             </label>
           </div>
+        </div>
+
+        <div className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2">
+          <div className="flex items-center gap-2">
+            <Lock className="h-4 w-4 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-medium">Privado</p>
+              <p className="text-[11px] text-muted-foreground">Só você verá este item — ideal para surpresas.</p>
+            </div>
+          </div>
+          <Switch checked={isPrivate} onCheckedChange={setIsPrivate} />
         </div>
 
         <div className="flex gap-2 pt-2">
