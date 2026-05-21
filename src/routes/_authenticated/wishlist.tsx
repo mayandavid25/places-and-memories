@@ -72,7 +72,9 @@ function WishlistPage() {
   const setStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("wishlist_items").update({ status: status as never }).eq("id", id);
     if (error) return toast.error(error.message);
+    if (status === "visitado") toast.success("Marcado como visitado — adicionado em Lugares ✨");
     qc.invalidateQueries({ queryKey: ["wishlist"] });
+    qc.invalidateQueries({ queryKey: ["places"] });
   };
 
   const remove = async (id: string) => {
