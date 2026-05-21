@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Trash2, Upload, X, MapPin, Calendar as CalendarIcon } from "lucide-react";
+import { Plus, Trash2, Upload, X, MapPin, Calendar as CalendarIcon, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -37,6 +38,8 @@ type WishlistItem = {
   lat: number | null;
   lng: number | null;
   photos: string[];
+  is_private: boolean;
+  linked_place_id: string | null;
   created_at: string;
 };
 
