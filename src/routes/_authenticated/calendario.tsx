@@ -54,6 +54,13 @@ function CalendarPage() {
   const [openNew, setOpenNew] = useState(false);
   const [editing, setEditing] = useState<EventRow | null>(null);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("new")) {
+      setOpenNew(true);
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
+
   const { data: events } = useQuery({
     queryKey: ["events", coupleId],
     enabled: !!coupleId,
