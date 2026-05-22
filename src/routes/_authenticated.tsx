@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Home, MapPin, Heart, Trophy, Tv, Calendar, User, Menu, ChefHat } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MobileNav } from "@/components/mobile-nav";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
