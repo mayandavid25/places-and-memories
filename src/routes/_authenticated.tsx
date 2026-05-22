@@ -20,7 +20,8 @@ const navItems = [
   { to: "/perfil", label: "Perfil", icon: User },
 ] as const;
 
-const mobileNav = navItems.filter((i) => ["/home", "/lugares", "/receitas", "/calendario", "/perfil"].includes(i.to));
+
+
 
 function AuthenticatedLayout() {
   const { user, profile, loading } = useAuth();
