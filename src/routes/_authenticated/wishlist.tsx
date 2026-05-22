@@ -54,6 +54,13 @@ function WishlistPage() {
   const [openNew, setOpenNew] = useState(false);
   const [editing, setEditing] = useState<WishlistItem | null>(null);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("new")) {
+      setOpenNew(true);
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
+
   const { data } = useQuery({
     queryKey: ["wishlist", coupleId],
     enabled: !!coupleId,
