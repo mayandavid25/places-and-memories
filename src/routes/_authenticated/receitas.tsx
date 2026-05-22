@@ -46,6 +46,13 @@ function ReceitasPage() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("new")) {
+      setCreating(true);
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
+
   const { data } = useQuery({
     queryKey: ["recipes", coupleId],
     enabled: !!coupleId,
