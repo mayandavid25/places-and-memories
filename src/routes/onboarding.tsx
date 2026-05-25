@@ -60,28 +60,17 @@ function OnboardingPage() {
   const joinCouple = async () => {
     setBusy(true);
     try {
-      const { data: invite, error: iErr } = await supabase
-        .from("couple_invites")
-        .select("code, couple_id, used_at, expires_at")
-        .eq("code", code.trim().toUpperCase())
-        .maybeSingle();
-      if (iErr) throw iErr;
-      if (!invite) throw new Error("Código inválido");
-      if (invite.used_at) throw new Error("Código já utilizado");
-      if (new Date(invite.expires_at) < new Date()) throw new Error("Código expirado");
+      const trimmed = code.trim().toUpperCase();
+      if (!trimmed) throw new Error("Informe o código");
 
-      const { error: pErr } = await supabase
-        .from("profiles")
-        .update({ couple_id: invite.couple_id })
-        .eq("id", user.id);
-      if (pErr) throw pErr;
+      const { error } = await supabase.rpc("join_couple_with_code", { _code: trimmed });
+      if (error) throw error;
 
-      await supabase.from("couple_invites").update({ used_at: new Date().toISOString() }).eq("code", invite.code);
       await refreshProfile();
       toast.success("Bem-vindo ao espaço!");
       void navigate({ to: "/home" });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro");
+      toast.error(err instanceof Error ? err.message : "Código inválido");
     } finally {
       setBusy(false);
     }
