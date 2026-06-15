@@ -92,7 +92,7 @@ function AuthenticatedLayout() {
         </div>
       </aside>
 
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         {/* Mobile top bar */}
         <header className="flex items-center justify-between border-b border-border px-5 py-4 md:hidden">
           <Link to="/home" className="font-serif text-lg italic text-foreground">

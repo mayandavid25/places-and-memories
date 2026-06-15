@@ -23,5 +23,5 @@ export function PageHeader({
 }
 
 export function PageShell({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("mx-auto w-full max-w-5xl px-5 py-8 sm:px-8 sm:py-12", className)}>{children}</div>;
+  return <div className={cn("mx-auto w-full max-w-5xl overflow-x-hidden px-5 py-8 sm:px-8 sm:py-12", className)}>{children}</div>;
 }
