@@ -51,6 +51,7 @@ function CalendarPage() {
   const navigate = useNavigate();
   const coupleId = profile?.couple_id;
   const [month, setMonth] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [openNew, setOpenNew] = useState(false);
   const [editing, setEditing] = useState<EventRow | null>(null);
 
