@@ -58,9 +58,10 @@ function HomePage() {
       </div>
 
       <div className="grid gap-8 md:grid-cols-2">
-        <section>
+        <section className="min-w-0">
           <SectionTitle icon={<MapPin className="h-3.5 w-3.5" />} title="Últimos lugares" link="/lugares" />
           <div className="grid grid-cols-2 gap-3">
+
             {(data?.places ?? []).map((p) => (
               <Link
                 key={p.id}
