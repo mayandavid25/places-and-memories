@@ -165,51 +165,74 @@ function WishlistRow({
 }: { item: WishlistItem; onOpen: () => void; onStatus: (s: string) => void; onDelete: () => void }) {
   const firstPhoto = item.photos?.[0] ?? null;
   const thumb = useSignedUrl(firstPhoto);
+  const address = item.formatted_address ?? item.location ?? null;
   return (
-    <div className="group flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 transition hover:border-primary/40">
-      <button onClick={onOpen} className="flex min-w-0 flex-1 items-center gap-3 text-left">
-        <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: PRIORITY_COLORS[item.priority - 1] }} />
+    <div className="group flex h-full flex-col gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-primary/40">
+      <div className="flex items-start gap-3">
+        <span
+          className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
+          style={{ background: PRIORITY_COLORS[item.priority - 1] }}
+        />
         {firstPhoto && (
           <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-muted">
             {thumb && <img src={thumb} alt="" className="h-full w-full object-cover" />}
           </div>
         )}
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">{item.name}</p>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+        <button onClick={onOpen} className="min-w-0 flex-1 space-y-1.5 text-left">
+          {/* Linha 1: nome em destaque */}
+          <p className="break-words text-sm font-medium leading-snug">{item.name}</p>
+
+          {/* Linha 2: categoria como pill + privado + data */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {item.category && (
+              <span className="rounded-full border border-border bg-background px-2 py-0.5 text-[10px] capitalize text-foreground/70">
+                {CATEGORY_LABEL[item.category as never]}
+              </span>
+            )}
             {item.is_private && (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-muted px-1.5 py-0.5 text-[10px]">
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                 <Lock className="h-2.5 w-2.5" /> privado
               </span>
             )}
-            {item.category && <span className="capitalize">{CATEGORY_LABEL[item.category as never]}</span>}
             {item.planned_date && (
-              <span className="inline-flex items-center gap-1">
-                <CalendarIcon className="h-3 w-3" />
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                <CalendarIcon className="h-2.5 w-2.5" />
                 {format(new Date(item.planned_date + "T00:00"), "d MMM yyyy", { locale: ptBR })}
               </span>
             )}
-            {item.location && (
-              <span className="inline-flex min-w-0 items-center gap-1">
-                <MapPin className="h-3 w-3 shrink-0" />
-                <span className="truncate">{item.location}</span>
-              </span>
-            )}
           </div>
-          {item.location && (
-            <div className="mt-1.5">
-              <MapsActions query={item.formatted_address ?? item.location} lat={item.lat} lng={item.lng} />
-            </div>
+
+          {/* Linha 3: endereço completo sem truncamento */}
+          {address && (
+            <p className="flex items-start gap-1 text-xs text-muted-foreground">
+              <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
+              <span className="break-words">{address}</span>
+            </p>
           )}
-        </div>
-      </button>
-      <Select value={item.status} onValueChange={onStatus}>
-        <SelectTrigger className="h-8 w-36 rounded-full text-xs"><SelectValue /></SelectTrigger>
-        <SelectContent>
-          {Object.entries(WISHLIST_STATUS_LABEL).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
-        </SelectContent>
-      </Select>
-      <button onClick={onDelete} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+        </button>
+        <button onClick={onDelete} className="shrink-0 text-muted-foreground hover:text-destructive">
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Linha 4: botões alinhados — Maps, Rota, Status */}
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1">
+        {address ? (
+          <MapsActions query={item.formatted_address ?? item.location} lat={item.lat} lng={item.lng} />
+        ) : (
+          <span />
+        )}
+        <Select value={item.status} onValueChange={onStatus}>
+          <SelectTrigger className="h-8 w-auto min-w-[9rem] rounded-full text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(WISHLIST_STATUS_LABEL).map(([v, l]) => (
+              <SelectItem key={v} value={v}>{l}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
     </div>
   );
 }
