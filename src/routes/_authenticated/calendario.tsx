@@ -111,35 +111,57 @@ function CalendarPage() {
           <button onClick={() => setMonth(addMonths(month, 1))} className="text-sm text-muted-foreground hover:text-primary">→</button>
         </div>
         <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground">
-          {["dom", "seg", "ter", "qua", "qui", "sex", "sáb"].map((d) => <div key={d} className="py-1">{d}</div>)}
+          {["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => <div key={i} className="py-1">{d}</div>)}
         </div>
         <div className="mt-1 grid grid-cols-7 gap-1">
           {days.map((d) => {
             const es = eventsByDay(d);
+            const hasEvent = es.length > 0;
+            const isSelected = selectedDay && isSameDay(d, selectedDay);
+            const inMonth = isSameMonth(d, month);
             return (
-              <div key={d.toISOString()} className={cn(
-                "aspect-square rounded-xl border p-1 text-xs",
-                isSameMonth(d, month) ? "border-border bg-background" : "border-transparent bg-transparent text-muted-foreground/40",
-                isSameDay(d, new Date()) && "ring-2 ring-primary/40",
-              )}>
-                <div className="flex justify-end">{format(d, "d")}</div>
-                {es.length > 0 && (
-                  <div className="mt-0.5 space-y-0.5">
-                    {es.slice(0, 2).map((e) => (
-                      <button
-                        key={e.id}
-                        onClick={() => setEditing(e)}
-                        className="block w-full truncate rounded bg-primary/15 px-1 py-0.5 text-left text-[10px] text-primary hover:bg-primary/25"
-                      >
-                        {e.title}
-                      </button>
-                    ))}
-                  </div>
+              <button
+                key={d.toISOString()}
+                type="button"
+                onClick={() => hasEvent && setSelectedDay(isSelected ? null : d)}
+                className={cn(
+                  "relative flex aspect-square flex-col items-center justify-center rounded-2xl border text-xs transition",
+                  inMonth ? "border-border bg-background" : "border-transparent bg-transparent text-muted-foreground/40",
+                  isSameDay(d, new Date()) && "ring-2 ring-primary/40",
+                  isSelected && "border-primary bg-primary/10 text-primary",
+                  hasEvent ? "cursor-pointer hover:border-primary/40" : "cursor-default",
                 )}
-              </div>
+              >
+                <span className="leading-none">{format(d, "d")}</span>
+                {hasEvent && (
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
+                )}
+              </button>
             );
           })}
         </div>
+
+        {selectedDay && (
+          <div className="mt-4 border-t border-border pt-4">
+            <p className="mb-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              {format(selectedDay, "d 'de' MMMM", { locale: ptBR })}
+            </p>
+            <div className="space-y-2">
+              {eventsByDay(selectedDay).map((e) => (
+                <button
+                  key={e.id}
+                  onClick={() => setEditing(e)}
+                  className="block w-full rounded-xl border border-border bg-background px-3 py-2 text-left transition hover:border-primary/40"
+                >
+                  <p className="truncate text-sm font-medium">{e.title}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {[e.time, e.formatted_address ?? e.location].filter(Boolean).join(" · ")}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <section className="mt-8">
