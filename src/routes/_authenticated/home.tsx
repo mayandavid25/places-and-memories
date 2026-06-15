@@ -67,12 +67,12 @@ function HomePage() {
                 key={p.id}
                 to="/lugares/$id"
                 params={{ id: p.id }}
-                className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-md"
+                className="group block min-w-0 overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-md"
               >
                 <PlaceCover path={p.photos?.[0] ?? null} />
-                <div className="p-3">
-                  <p className="line-clamp-1 text-sm font-medium">{p.name}</p>
-                  <p className="text-xs capitalize text-muted-foreground">{p.category}</p>
+                <div className="min-w-0 p-3">
+                  <p className="line-clamp-1 truncate text-sm font-medium">{p.name}</p>
+                  <p className="truncate text-xs capitalize text-muted-foreground">{p.category}</p>
                 </div>
               </Link>
             ))}
