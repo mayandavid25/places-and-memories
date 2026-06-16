@@ -62,14 +62,17 @@ function HomePage() {
       <div className="grid gap-8 md:grid-cols-2">
         <section className="min-w-0">
           <SectionTitle icon={<MapPin className="h-3.5 w-3.5" />} title="Últimos lugares" link="/lugares" />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3">
 
-            {(data?.places ?? []).map((p) => (
+            {(data?.places ?? []).map((p, idx) => (
               <Link
                 key={p.id}
                 to="/lugares/$id"
                 params={{ id: p.id }}
-                className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-md"
+                className={cn(
+                  "group block min-w-0 overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-md",
+                  idx >= 4 && "hidden md:block",
+                )}
               >
                 <PlaceCover path={p.photos?.[0] ?? null} />
                 <div className="p-3">
