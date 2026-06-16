@@ -34,12 +34,8 @@ const quickActions = [
 export function MobileNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const [moreOpen, setMoreOpen] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
 
-  const moreActive = moreItems.some(
-    (i) => pathname === i.to || pathname.startsWith(i.to + "/"),
-  );
 
   return (
     <>
