@@ -161,19 +161,21 @@ function HomePage() {
   );
 }
 
-function SectionTitle({ icon, title, link }: { icon: React.ReactNode; title: string; link?: string }) {
+function SectionTitle({ icon, title, link, action }: { icon: React.ReactNode; title: string; link?: string; action?: React.ReactNode }) {
   return (
     <div className="mb-3 flex items-center justify-between">
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
         {icon}
         {title}
       </div>
-      {link && (
+      {action ? (
+        action
+      ) : link ? (
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         <Link to={link as any} className="text-xs text-primary hover:underline">
           ver tudo
         </Link>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -181,7 +183,7 @@ function SectionTitle({ icon, title, link }: { icon: React.ReactNode; title: str
 function PlaceCover({ path }: { path: string | null }) {
   const url = useSignedUrl(path);
   return (
-    <div className="aspect-[3/4] w-full bg-muted">
+    <div className="aspect-square w-full bg-muted">
       {url && <img src={url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />}
     </div>
   );
