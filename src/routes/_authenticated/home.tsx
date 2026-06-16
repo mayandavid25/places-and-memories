@@ -111,7 +111,25 @@ function HomePage() {
           </div>
 
           <div>
-            <SectionTitle icon={<Trophy className="h-3.5 w-3.5" />} title="Top do casal" link="/ranking" />
+            <SectionTitle
+              icon={<Trophy className="h-3.5 w-3.5" />}
+              title="Top do casal"
+              action={
+                <Sheet>
+                  <SheetTrigger className="text-xs text-primary hover:underline">
+                    ver tudo
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
+                    <SheetHeader>
+                      <SheetTitle>Top do casal</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4">
+                      <TopList coupleId={coupleId} limit={50} />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              }
+            />
             <TopList coupleId={coupleId} />
           </div>
 
