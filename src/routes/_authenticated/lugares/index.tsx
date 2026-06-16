@@ -11,6 +11,8 @@ import { useSignedUrl } from "@/hooks/use-signed-url";
 import { Heart, Plus, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, CATEGORY_LABEL, type PlaceCategory } from "@/lib/categories";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { WishlistContent } from "@/routes/_authenticated/wishlist";
 
 export const Route = createFileRoute("/_authenticated/lugares/")({
   component: LugaresPage,
