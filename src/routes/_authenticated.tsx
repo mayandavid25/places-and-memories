@@ -1,9 +1,10 @@
 import { createFileRoute, Outlet, useNavigate, Link, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Home, MapPin, Heart, Trophy, Tv, Calendar, User, Menu, ChefHat } from "lucide-react";
+import { Home, MapPin, Heart, Trophy, Tv, Calendar, User, ChefHat } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MobileNav } from "@/components/mobile-nav";
+import { UserAvatar } from "@/components/user-avatar";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
@@ -99,7 +100,7 @@ function AuthenticatedLayout() {
             nossos lugares
           </Link>
           <Link to="/perfil" className="text-muted-foreground">
-            <Menu className="h-5 w-5" />
+            <UserAvatar name={profile?.display_name} src={profile?.avatar_url} size={32} />
           </Link>
         </header>
 

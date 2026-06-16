@@ -1,14 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { PageShell } from "@/components/page-shell";
 import { StarRating } from "@/components/star-rating";
 import { UserAvatar } from "@/components/user-avatar";
 import { useSignedUrl } from "@/hooks/use-signed-url";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MapPin, Calendar, Trophy, MessageCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/home")({
   component: HomePage,
@@ -60,14 +63,17 @@ function HomePage() {
       <div className="grid gap-8 md:grid-cols-2">
         <section className="min-w-0">
           <SectionTitle icon={<MapPin className="h-3.5 w-3.5" />} title="Últimos lugares" link="/lugares" />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3">
 
-            {(data?.places ?? []).map((p) => (
+            {(data?.places ?? []).map((p, idx) => (
               <Link
                 key={p.id}
                 to="/lugares/$id"
                 params={{ id: p.id }}
-                className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-md"
+                className={cn(
+                  "group block min-w-0 overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-md",
+                  idx >= 4 && "hidden md:block",
+                )}
               >
                 <PlaceCover path={p.photos?.[0] ?? null} />
                 <div className="p-3">
@@ -105,7 +111,25 @@ function HomePage() {
           </div>
 
           <div>
-            <SectionTitle icon={<Trophy className="h-3.5 w-3.5" />} title="Top do casal" link="/ranking" />
+            <SectionTitle
+              icon={<Trophy className="h-3.5 w-3.5" />}
+              title="Top do casal"
+              action={
+                <Sheet>
+                  <SheetTrigger className="text-xs text-primary hover:underline">
+                    ver tudo
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
+                    <SheetHeader>
+                      <SheetTitle>Top do casal</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4">
+                      <TopList coupleId={coupleId} limit={50} />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              }
+            />
             <TopList coupleId={coupleId} />
           </div>
 
@@ -137,19 +161,21 @@ function HomePage() {
   );
 }
 
-function SectionTitle({ icon, title, link }: { icon: React.ReactNode; title: string; link?: string }) {
+function SectionTitle({ icon, title, link, action }: { icon: React.ReactNode; title: string; link?: string; action?: React.ReactNode }) {
   return (
     <div className="mb-3 flex items-center justify-between">
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
         {icon}
         {title}
       </div>
-      {link && (
+      {action ? (
+        action
+      ) : link ? (
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         <Link to={link as any} className="text-xs text-primary hover:underline">
           ver tudo
         </Link>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -157,7 +183,7 @@ function SectionTitle({ icon, title, link }: { icon: React.ReactNode; title: str
 function PlaceCover({ path }: { path: string | null }) {
   const url = useSignedUrl(path);
   return (
-    <div className="aspect-[3/4] w-full bg-muted">
+    <div className="aspect-square w-full bg-muted">
       {url && <img src={url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />}
     </div>
   );
@@ -171,9 +197,9 @@ function EmptyHint({ text }: { text: string }) {
   );
 }
 
-function TopList({ coupleId }: { coupleId: string | null | undefined }) {
+function TopList({ coupleId, limit = 3 }: { coupleId: string | null | undefined; limit?: number }) {
   const { data } = useQuery({
-    queryKey: ["home-top", coupleId],
+    queryKey: ["home-top", coupleId, limit],
     enabled: !!coupleId,
     queryFn: async () => {
       const { data } = await supabase
@@ -189,7 +215,7 @@ function TopList({ coupleId }: { coupleId: string | null | undefined }) {
         })
         .filter((p) => p.count > 0)
         .sort((a, b) => b.avg - a.avg)
-        .slice(0, 3);
+        .slice(0, limit);
       return ranked;
     },
   });

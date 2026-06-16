@@ -11,6 +11,8 @@ import { useSignedUrl } from "@/hooks/use-signed-url";
 import { Heart, Plus, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, CATEGORY_LABEL, type PlaceCategory } from "@/lib/categories";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { WishlistContent } from "@/routes/_authenticated/wishlist";
 
 export const Route = createFileRoute("/_authenticated/lugares/")({
   component: LugaresPage,
@@ -74,48 +76,61 @@ function LugaresPage() {
         }
       />
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nome..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="h-10 rounded-full pl-9"
-          />
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          <Chip active={category === "all"} onClick={() => setCategory("all")}>Todos</Chip>
-          {CATEGORIES.map((c) => (
-            <Chip key={c} active={category === c} onClick={() => setCategory(c)}>
-              {CATEGORY_LABEL[c]}
-            </Chip>
-          ))}
-        </div>
-      </div>
+      <Tabs defaultValue="visitados" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="visitados">Visitados</TabsTrigger>
+          <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
+        </TabsList>
 
-      <div className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
-        Nota mínima:
-        <StarRating value={minRating} onChange={setMinRating} size={14} />
-        {minRating > 0 && (
-          <button onClick={() => setMinRating(0)} className="ml-2 hover:text-primary">limpar</button>
-        )}
-      </div>
+        <TabsContent value="visitados" className="mt-0">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nome..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="h-10 rounded-full pl-9"
+              />
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              <Chip active={category === "all"} onClick={() => setCategory("all")}>Todos</Chip>
+              {CATEGORIES.map((c) => (
+                <Chip key={c} active={category === c} onClick={() => setCategory(c)}>
+                  {CATEGORY_LABEL[c]}
+                </Chip>
+              ))}
+            </div>
+          </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {filtered.map((p) => (
-          <PlaceCard key={p.id} place={p} />
-        ))}
-      </div>
+          <div className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
+            Nota mínima:
+            <StarRating value={minRating} onChange={setMinRating} size={14} />
+            {minRating > 0 && (
+              <button onClick={() => setMinRating(0)} className="ml-2 hover:text-primary">limpar</button>
+            )}
+          </div>
 
-      {filtered.length === 0 && (
-        <div className="rounded-3xl border border-dashed border-border bg-card/40 py-20 text-center">
-          <p className="font-serif text-2xl italic text-muted-foreground">nenhum lugar por aqui ainda</p>
-          <Button onClick={() => navigate({ to: "/lugares/novo" })} className="mt-6 rounded-full">
-            <Plus className="mr-1 h-4 w-4" /> Adicionar o primeiro
-          </Button>
-        </div>
-      )}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {filtered.map((p) => (
+              <PlaceCard key={p.id} place={p} />
+            ))}
+          </div>
+
+          {filtered.length === 0 && (
+            <div className="rounded-3xl border border-dashed border-border bg-card/40 py-20 text-center">
+              <p className="font-serif text-2xl italic text-muted-foreground">nenhum lugar por aqui ainda</p>
+              <Button onClick={() => navigate({ to: "/lugares/novo" })} className="mt-6 rounded-full">
+                <Plus className="mr-1 h-4 w-4" /> Adicionar o primeiro
+              </Button>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="wishlist" className="mt-0">
+          <WishlistContent embedded />
+        </TabsContent>
+      </Tabs>
     </PageShell>
   );
 }

@@ -47,6 +47,14 @@ const PRIORITY_COLORS = ["#b5654e", "#c9a48c", "#d9c8be"];
 const PRIORITY_LABEL: Record<number, string> = { 1: "Alta", 2: "Média", 3: "Baixa" };
 
 function WishlistPage() {
+  return (
+    <PageShell>
+      <WishlistContent />
+    </PageShell>
+  );
+}
+
+export function WishlistContent({ embedded = false }: { embedded?: boolean } = {}) {
   const { user, profile } = useAuth();
   const qc = useQueryClient();
   const coupleId = profile?.couple_id;
@@ -96,29 +104,35 @@ function WishlistPage() {
     items: (data ?? []).filter((i) => i.status === s),
   }));
 
-  return (
-    <PageShell>
-      <PageHeader
-        title="Wishlist"
-        subtitle="Lugares que queremos visitar."
-        action={
-          <Dialog open={openNew} onOpenChange={setOpenNew}>
-            <DialogTrigger asChild>
-              <Button className="rounded-full"><Plus className="mr-1 h-4 w-4" /> Adicionar</Button>
-            </DialogTrigger>
-            <WishlistFormDialog
-              key={openNew ? "new-open" : "new-closed"}
-              mode="create"
-              userId={user?.id}
-              coupleId={coupleId}
-              onSaved={() => {
-                setOpenNew(false);
-                qc.invalidateQueries({ queryKey: ["wishlist"] });
-              }}
-            />
-          </Dialog>
-        }
+  const addDialog = (
+    <Dialog open={openNew} onOpenChange={setOpenNew}>
+      <DialogTrigger asChild>
+        <Button className="rounded-full"><Plus className="mr-1 h-4 w-4" /> Adicionar</Button>
+      </DialogTrigger>
+      <WishlistFormDialog
+        key={openNew ? "new-open" : "new-closed"}
+        mode="create"
+        userId={user?.id}
+        coupleId={coupleId}
+        onSaved={() => {
+          setOpenNew(false);
+          qc.invalidateQueries({ queryKey: ["wishlist"] });
+        }}
       />
+    </Dialog>
+  );
+
+  return (
+    <>
+      {embedded ? (
+        <div className="mb-6 flex justify-end">{addDialog}</div>
+      ) : (
+        <PageHeader
+          title="Wishlist"
+          subtitle="Lugares que queremos visitar."
+          action={addDialog}
+        />
+      )}
 
       <div className="space-y-8">
         {groups.map(({ status, items }) => (
@@ -156,7 +170,7 @@ function WishlistPage() {
           />
         )}
       </Dialog>
-    </PageShell>
+    </>
   );
 }
 
@@ -202,11 +216,11 @@ function WishlistRow({
             )}
           </div>
 
-          {/* Linha 3: endereço completo sem truncamento */}
+          {/* Linha 3: endereço completo em uma linha */}
           {address && (
-            <p className="flex items-start gap-1 text-xs text-muted-foreground">
-              <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-              <span className="break-words">{address}</span>
+            <p className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin className="h-3 w-3 shrink-0" />
+              <span className="truncate">{address}</span>
             </p>
           )}
         </button>
