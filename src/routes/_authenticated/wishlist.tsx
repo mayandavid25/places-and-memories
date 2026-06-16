@@ -202,11 +202,11 @@ function WishlistRow({
             )}
           </div>
 
-          {/* Linha 3: endereço completo sem truncamento */}
+          {/* Linha 3: endereço completo em uma linha */}
           {address && (
-            <p className="flex items-start gap-1 text-xs text-muted-foreground">
-              <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-              <span className="break-words">{address}</span>
+            <p className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin className="h-3 w-3 shrink-0" />
+              <span className="truncate">{address}</span>
             </p>
           )}
         </button>
