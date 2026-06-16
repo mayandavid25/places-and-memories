@@ -197,9 +197,9 @@ function EmptyHint({ text }: { text: string }) {
   );
 }
 
-function TopList({ coupleId }: { coupleId: string | null | undefined }) {
+function TopList({ coupleId, limit = 3 }: { coupleId: string | null | undefined; limit?: number }) {
   const { data } = useQuery({
-    queryKey: ["home-top", coupleId],
+    queryKey: ["home-top", coupleId, limit],
     enabled: !!coupleId,
     queryFn: async () => {
       const { data } = await supabase
@@ -215,7 +215,7 @@ function TopList({ coupleId }: { coupleId: string | null | undefined }) {
         })
         .filter((p) => p.count > 0)
         .sort((a, b) => b.avg - a.avg)
-        .slice(0, 3);
+        .slice(0, limit);
       return ranked;
     },
   });
