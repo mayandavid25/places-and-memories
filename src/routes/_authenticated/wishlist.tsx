@@ -216,7 +216,7 @@ function WishlistRow({
       </div>
 
       {/* Linha 4: botões alinhados — Maps, Rota, Status */}
-      <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1">
+      <div className="mt-auto flex items-center justify-between gap-2 pt-1">
         {address ? (
           <MapsActions query={item.formatted_address ?? item.location} lat={item.lat} lng={item.lng} />
         ) : (

@@ -25,7 +25,8 @@ export function MapsActions({ query, lat, lng, className, size = "sm" }: Props) 
           base,
         )}
       >
-        <ExternalLink className="h-3 w-3" /> Ver no Maps
+        <ExternalLink className="h-3 w-3" />
+        <span className="hidden sm:inline">Ver no </span>Maps
       </a>
       <a
         href={mapsDirectionsUrl({ query, lat, lng })}
