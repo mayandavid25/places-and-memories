@@ -110,10 +110,20 @@ function CalendarPage() {
           <h2 className="font-serif text-xl capitalize">{format(month, "MMMM yyyy", { locale: ptBR })}</h2>
           <button onClick={() => setMonth(addMonths(month, 1))} className="text-sm text-muted-foreground hover:text-primary">→</button>
         </div>
+        {/* Cabeçalho dias da semana */}
         <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground">
-          {["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => <div key={i} className="py-1">{d}</div>)}
+          {/* Mobile: iniciais únicas */}
+          <div className="contents md:hidden">
+            {["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => <div key={i} className="py-1">{d}</div>)}
+          </div>
+          {/* Desktop: nomes abreviados */}
+          <div className="contents max-md:hidden">
+            {["dom", "seg", "ter", "qua", "qui", "sex", "sáb"].map((d) => <div key={d} className="py-1">{d}</div>)}
+          </div>
         </div>
-        <div className="mt-1 grid grid-cols-7 gap-1">
+
+        {/* Mobile: squircle + ponto + clique para abrir eventos do dia */}
+        <div className="mt-1 grid grid-cols-7 gap-1 md:hidden">
           {days.map((d) => {
             const es = eventsByDay(d);
             const hasEvent = es.length > 0;
@@ -141,8 +151,37 @@ function CalendarPage() {
           })}
         </div>
 
+        {/* Desktop: layout original com títulos inline */}
+        <div className="mt-1 hidden grid-cols-7 gap-1 md:grid">
+          {days.map((d) => {
+            const es = eventsByDay(d);
+            return (
+              <div key={d.toISOString()} className={cn(
+                "aspect-square rounded-xl border p-1 text-xs",
+                isSameMonth(d, month) ? "border-border bg-background" : "border-transparent bg-transparent text-muted-foreground/40",
+                isSameDay(d, new Date()) && "ring-2 ring-primary/40",
+              )}>
+                <div className="flex justify-end">{format(d, "d")}</div>
+                {es.length > 0 && (
+                  <div className="mt-0.5 space-y-0.5">
+                    {es.slice(0, 2).map((e) => (
+                      <button
+                        key={e.id}
+                        onClick={() => setEditing(e)}
+                        className="block w-full truncate rounded bg-primary/15 px-1 py-0.5 text-left text-[10px] text-primary hover:bg-primary/25"
+                      >
+                        {e.title}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
         {selectedDay && (
-          <div className="mt-4 border-t border-border pt-4">
+          <div className="mt-4 border-t border-border pt-4 md:hidden">
             <p className="mb-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
               {format(selectedDay, "d 'de' MMMM", { locale: ptBR })}
             </p>
