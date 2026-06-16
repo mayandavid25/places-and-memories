@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MapPin, Calendar, Trophy, MessageCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/home")({
   component: HomePage,
