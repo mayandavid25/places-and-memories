@@ -60,19 +60,19 @@ function HomePage() {
       <div className="grid gap-8 md:grid-cols-2">
         <section className="min-w-0">
           <SectionTitle icon={<MapPin className="h-3.5 w-3.5" />} title="Últimos lugares" link="/lugares" />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
 
             {(data?.places ?? []).map((p) => (
               <Link
                 key={p.id}
                 to="/lugares/$id"
                 params={{ id: p.id }}
-                className="group block min-w-0 overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-md"
+                className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-md"
               >
                 <PlaceCover path={p.photos?.[0] ?? null} />
-                <div className="min-w-0 p-3">
-                  <p className="line-clamp-1 truncate text-sm font-medium">{p.name}</p>
-                  <p className="truncate text-xs capitalize text-muted-foreground">{p.category}</p>
+                <div className="p-3">
+                  <p className="line-clamp-1 text-sm font-medium">{p.name}</p>
+                  <p className="text-xs capitalize text-muted-foreground">{p.category}</p>
                 </div>
               </Link>
             ))}
