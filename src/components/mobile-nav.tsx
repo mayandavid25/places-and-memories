@@ -30,13 +30,6 @@ const quickActions = [
   { to: "/calendario", label: "Adicionar evento", icon: CalendarPlus, search: { new: 1 } },
 ] as const;
 
-const quickActions = [
-  { to: "/lugares/novo", label: "Adicionar lugar", icon: MapPin, search: undefined },
-  { to: "/wishlist", label: "Adicionar à wishlist", icon: Heart, search: { new: 1 } },
-  { to: "/receitas", label: "Adicionar receita", icon: ChefHat, search: { new: 1 } },
-  { to: "/entretenimento", label: "Adicionar entretenimento", icon: Tv, search: undefined },
-  { to: "/calendario", label: "Adicionar evento", icon: CalendarPlus, search: { new: 1 } },
-] as const;
 
 export function MobileNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
