@@ -100,7 +100,7 @@ function AuthenticatedLayout() {
             nossos lugares
           </Link>
           <Link to="/perfil" className="text-muted-foreground">
-            <Menu className="h-5 w-5" />
+            <UserAvatar name={profile?.display_name} src={profile?.avatar_url} size={32} />
           </Link>
         </header>
 
