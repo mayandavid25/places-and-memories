@@ -3,13 +3,10 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Home,
   MapPin,
-  Heart,
   Calendar,
-  MoreHorizontal,
   ChefHat,
   Tv,
-  Trophy,
-  User,
+  Heart,
   Plus,
   X,
   CalendarPlus,
@@ -20,15 +17,17 @@ import { cn } from "@/lib/utils";
 const bottomItems = [
   { to: "/home", label: "Home", icon: Home },
   { to: "/lugares", label: "Lugares", icon: MapPin },
-  { to: "/wishlist", label: "Wishlist", icon: Heart },
   { to: "/calendario", label: "Calendário", icon: Calendar },
+  { to: "/receitas", label: "Receitas", icon: ChefHat },
+  { to: "/entretenimento", label: "Entretenimento", icon: Tv },
 ] as const;
 
-const moreItems = [
-  { to: "/receitas", label: "Receitas", icon: ChefHat, desc: "Cozinhem juntos" },
-  { to: "/entretenimento", label: "Entretenimento", icon: Tv, desc: "Filmes, séries e mais" },
-  { to: "/ranking", label: "Ranking", icon: Trophy, desc: "Favoritos do casal" },
-  { to: "/perfil", label: "Perfil", icon: User, desc: "Conta e espaço" },
+const quickActions = [
+  { to: "/lugares/novo", label: "Adicionar lugar", icon: MapPin, search: undefined },
+  { to: "/wishlist", label: "Adicionar à wishlist", icon: Heart, search: { new: 1 } },
+  { to: "/receitas", label: "Adicionar receita", icon: ChefHat, search: { new: 1 } },
+  { to: "/entretenimento", label: "Adicionar entretenimento", icon: Tv, search: undefined },
+  { to: "/calendario", label: "Adicionar evento", icon: CalendarPlus, search: { new: 1 } },
 ] as const;
 
 const quickActions = [
