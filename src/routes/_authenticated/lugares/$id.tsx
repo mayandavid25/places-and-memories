@@ -364,10 +364,12 @@ function ReviewForm({ placeId, existing }: { placeId: string; existing: Existing
   const save = async () => {
     if (!user || rating === 0) return;
     setBusy(true);
-    const { error } = await supabase.from("place_reviews").upsert(
-      { place_id: placeId, user_id: user.id, rating, comment: comment || null },
-      { onConflict: "place_id,user_id" },
-    );
+    const payload = { rating, comment: comment || null };
+    const { error } = existing
+      ? await supabase.from("place_reviews").update(payload).eq("id", existing.id)
+      : await supabase
+          .from("place_reviews")
+          .insert({ place_id: placeId, user_id: user.id, ...payload });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Avaliação salva");
