@@ -395,7 +395,7 @@ function ReviewForm({ placeId, existing }: { placeId: string; existing: Existing
 
   return (
     <div className="mt-8 rounded-2xl border border-border bg-card p-5">
-      <h3 className="font-serif text-lg">{existing ? "Sua avaliação" : "Adicionar sua avaliação"}</h3>
+      <h3 className="font-serif text-lg">{existing ? "Sua avaliação" : "Adicionar avaliação"}</h3>
       <div className="mt-3">
         <StarRating value={rating} onChange={setRating} size={22} />
       </div>
