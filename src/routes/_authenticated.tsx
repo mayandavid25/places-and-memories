@@ -21,9 +21,6 @@ const navItems = [
   { to: "/perfil", label: "Perfil", icon: User },
 ] as const;
 
-
-
-
 function AuthenticatedLayout() {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
@@ -48,13 +45,12 @@ function AuthenticatedLayout() {
     );
   }
 
-  // onboarding renders standalone
   if (pathname === "/onboarding") {
     return <Outlet />;
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
+    <div className="flex h-screen w-full overflow-hidden bg-background">
       {/* Desktop sidebar */}
       <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar md:flex md:flex-col">
         <div className="px-6 py-7">
@@ -93,7 +89,7 @@ function AuthenticatedLayout() {
         </div>
       </aside>
 
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Mobile top bar */}
         <header className="flex items-center justify-between border-b border-border px-5 py-4 md:hidden">
           <Link to="/home" className="font-serif text-lg italic text-foreground">
@@ -104,12 +100,11 @@ function AuthenticatedLayout() {
           </Link>
         </header>
 
-        <main className="w-full min-w-0 max-w-full flex-1 overflow-x-hidden pb-24 md:pb-0">
+        <main className="w-full min-w-0 flex-1 overflow-y-auto overflow-x-hidden pb-24 md:pb-0">
           <Outlet />
         </main>
 
         <MobileNav />
-
       </div>
     </div>
   );
