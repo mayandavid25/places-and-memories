@@ -19,7 +19,7 @@ const bottomItems = [
   { to: "/lugares", label: "Lugares", icon: MapPin },
   { to: "/calendario", label: "Calendário", icon: Calendar },
   { to: "/receitas", label: "Receitas", icon: ChefHat },
-  { to: "/entretenimento", label: "Entretenimento", icon: Tv },
+  { to: "/entretenimento", label: "Lazer", icon: Tv },
 ] as const;
 
 const quickActions = [
@@ -57,7 +57,7 @@ export function MobileNav() {
         className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 backdrop-blur md:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
-        <div className="mx-auto flex max-w-md items-center justify-around px-2 py-2">
+        <div className="mx-auto grid max-w-md grid-cols-5 items-center px-2 py-2">
           {bottomItems.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.to || pathname.startsWith(item.to + "/");
@@ -66,12 +66,12 @@ export function MobileNav() {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "flex flex-col items-center gap-0.5 rounded-xl px-3 py-2 text-[10px] uppercase tracking-wider transition",
+                  "flex w-full flex-col items-center gap-0.5 rounded-xl px-1 py-2 text-[10px] uppercase tracking-wider transition",
                   active ? "text-primary" : "text-muted-foreground",
                 )}
               >
                 <Icon className="h-5 w-5" />
-                {item.label}
+                <span className="truncate">{item.label}</span>
               </Link>
             );
           })}
