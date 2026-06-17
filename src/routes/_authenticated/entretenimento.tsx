@@ -461,37 +461,20 @@ function EntDetailDialog({
               />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label>Status</Label>
-                <Select value={status} onValueChange={(v) => setStatus(v as EntStatus)}>
-                  <SelectTrigger className="h-11 rounded-xl">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(ENT_STATUS_LABEL).map(([v, l]) => (
-                      <SelectItem key={v} value={v}>
-                        {l}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Sua nota</Label>
-                <div className="flex h-11 items-center gap-2">
-                  <StarRating value={rating} onChange={setRating} size={22} />
-                  {rating > 0 && rating !== (myReview?.rating ?? 0) && (
-                    <Button
-                      size="sm"
-                      onClick={saveReview}
-                      className="h-7 rounded-full px-3 text-xs"
-                    >
-                      Salvar
-                    </Button>
-                  )}
-                </div>
-              </div>
+            <div className="space-y-1.5">
+              <Label>Status</Label>
+              <Select value={status} onValueChange={(v) => setStatus(v as EntStatus)}>
+                <SelectTrigger className="h-11 rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(ENT_STATUS_LABEL).map(([v, l]) => (
+                    <SelectItem key={v} value={v}>
+                      {l}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1.5">
