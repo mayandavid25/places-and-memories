@@ -301,29 +301,45 @@ function PlaceDetailPage() {
       {/* Reviews */}
       <section className="mt-10">
         <h2 className="mb-4 font-serif text-2xl">Avaliações</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {(reviews ?? []).map((r) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const prof = (r as any).profiles;
-            return (
-              <div key={r.id} className="rounded-2xl border border-border bg-card p-4">
-                <div className="flex items-center gap-3">
-                  <UserAvatar name={prof?.display_name} src={prof?.avatar_url} size={36} />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{prof?.display_name}</p>
-                    <StarRating value={r.rating} readOnly size={12} />
+        {reviews && reviews.length > 0 ? (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {reviews.map((r) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const prof = (r as any).profiles;
+                return (
+                  <div key={r.id} className="rounded-2xl border border-border bg-card p-4">
+                    <div className="flex items-center gap-3">
+                      <UserAvatar name={prof?.display_name} src={prof?.avatar_url} size={36} />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{prof?.display_name}</p>
+                        <StarRating value={r.rating} readOnly size={12} />
+                      </div>
+                    </div>
+                    {r.comment && (
+                      <p className="mt-3 text-sm leading-relaxed text-foreground/85">{r.comment}</p>
+                    )}
                   </div>
-                </div>
-                {r.comment && (
-                  <p className="mt-3 text-sm leading-relaxed text-foreground/85">{r.comment}</p>
-                )}
+                );
+              })}
+            </div>
+            {reviews.length > 1 && (
+              <div className="mt-4 flex items-center justify-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4">
+                <span className="text-sm font-medium text-foreground/80">Média do casal</span>
+                <StarRating
+                  value={reviews.reduce((a, b) => a + b.rating, 0) / reviews.length}
+                  readOnly
+                  size={18}
+                />
+                <span className="font-serif text-lg text-primary">
+                  {(reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)}
+                </span>
               </div>
-            );
-          })}
-          {reviews && reviews.length === 0 && (
-            <p className="col-span-full text-sm text-muted-foreground">Ainda sem avaliações.</p>
-          )}
-        </div>
+            )}
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">Ainda sem avaliações.</p>
+        )}
 
         <ReviewForm placeId={id} existing={myReview ?? null} />
       </section>
