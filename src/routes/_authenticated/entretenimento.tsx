@@ -543,30 +543,11 @@ function EntDetailDialog({
               </div>
             )}
 
-            {/* Your review comment */}
-            <div className="space-y-1.5">
-              <Label>Seu comentário</Label>
-              <Textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                rows={2}
-                placeholder="O que achou?"
-                className="rounded-xl"
-              />
-              <Button
-                size="sm"
-                onClick={saveReview}
-                disabled={rating === 0}
-                className="rounded-full"
-              >
-                Salvar avaliação
-              </Button>
-            </div>
+            {/* Reviews: individuais → média → form */}
+            <div className="space-y-3">
+              <h4 className="font-serif text-base italic">Avaliações</h4>
 
-            {/* All reviews / history */}
-            {reviews && reviews.length > 0 && (
-              <div>
-                <h4 className="mb-2 font-serif text-base italic">Histórico</h4>
+              {reviews && reviews.length > 0 ? (
                 <div className="space-y-2">
                   {reviews.map((r) => {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -597,8 +578,48 @@ function EntDetailDialog({
                     );
                   })}
                 </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Ainda sem avaliações.</p>
+              )}
+
+              {reviews && reviews.length > 1 && (
+                <div className="flex items-center justify-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-3">
+                  <span className="text-sm font-medium text-foreground/80">Média do casal</span>
+                  <StarRating
+                    value={reviews.reduce((a, b) => a + b.rating, 0) / reviews.length}
+                    readOnly
+                    size={18}
+                  />
+                  <span className="font-serif text-lg text-primary">
+                    {(reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)}
+                  </span>
+                </div>
+              )}
+
+              <div className="rounded-2xl border border-border bg-card p-4">
+                <p className="font-serif text-base">
+                  {myReview ? "Sua avaliação" : "Adicionar avaliação"}
+                </p>
+                <div className="mt-2">
+                  <StarRating value={rating} onChange={setRating} size={22} />
+                </div>
+                <Textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  rows={2}
+                  placeholder="O que achou?"
+                  className="mt-3 rounded-xl"
+                />
+                <Button
+                  size="sm"
+                  onClick={saveReview}
+                  disabled={rating === 0}
+                  className="mt-3 rounded-full"
+                >
+                  Salvar avaliação
+                </Button>
               </div>
-            )}
+            </div>
 
             <div className="flex justify-between border-t border-border pt-4">
               <Button
