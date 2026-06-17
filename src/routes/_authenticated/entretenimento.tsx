@@ -386,12 +386,13 @@ function EntDetailDialog({
 
   const saveReview = async () => {
     if (!user || rating === 0) return;
-    await supabase
-      .from("entertainment_reviews")
-      .upsert(
-        { item_id: id, user_id: user.id, rating, comment: newComment || null },
-        { onConflict: "item_id,user_id" },
-      );
+    const payload = { rating, comment: newComment || null };
+    const { error } = myReview
+      ? await supabase.from("entertainment_reviews").update(payload).eq("id", myReview.id)
+      : await supabase
+          .from("entertainment_reviews")
+          .insert({ item_id: id, user_id: user.id, ...payload });
+    if (error) return toast.error(error.message);
     toast.success("Avaliação salva");
     qc.invalidateQueries({ queryKey: ["ent-reviews", id] });
     qc.invalidateQueries({ queryKey: ["ent"] });
@@ -460,37 +461,20 @@ function EntDetailDialog({
               />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label>Status</Label>
-                <Select value={status} onValueChange={(v) => setStatus(v as EntStatus)}>
-                  <SelectTrigger className="h-11 rounded-xl">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(ENT_STATUS_LABEL).map(([v, l]) => (
-                      <SelectItem key={v} value={v}>
-                        {l}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Sua nota</Label>
-                <div className="flex h-11 items-center gap-2">
-                  <StarRating value={rating} onChange={setRating} size={22} />
-                  {rating > 0 && rating !== (myReview?.rating ?? 0) && (
-                    <Button
-                      size="sm"
-                      onClick={saveReview}
-                      className="h-7 rounded-full px-3 text-xs"
-                    >
-                      Salvar
-                    </Button>
-                  )}
-                </div>
-              </div>
+            <div className="space-y-1.5">
+              <Label>Status</Label>
+              <Select value={status} onValueChange={(v) => setStatus(v as EntStatus)}>
+                <SelectTrigger className="h-11 rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(ENT_STATUS_LABEL).map(([v, l]) => (
+                    <SelectItem key={v} value={v}>
+                      {l}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1.5">
@@ -559,30 +543,11 @@ function EntDetailDialog({
               </div>
             )}
 
-            {/* Your review comment */}
-            <div className="space-y-1.5">
-              <Label>Seu comentário</Label>
-              <Textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                rows={2}
-                placeholder="O que achou?"
-                className="rounded-xl"
-              />
-              <Button
-                size="sm"
-                onClick={saveReview}
-                disabled={rating === 0}
-                className="rounded-full"
-              >
-                Salvar avaliação
-              </Button>
-            </div>
+            {/* Reviews: individuais → média → form */}
+            <div className="space-y-3">
+              <h4 className="font-serif text-base italic">Avaliações</h4>
 
-            {/* All reviews / history */}
-            {reviews && reviews.length > 0 && (
-              <div>
-                <h4 className="mb-2 font-serif text-base italic">Histórico</h4>
+              {reviews && reviews.length > 0 ? (
                 <div className="space-y-2">
                   {reviews.map((r) => {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -613,8 +578,48 @@ function EntDetailDialog({
                     );
                   })}
                 </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Ainda sem avaliações.</p>
+              )}
+
+              {reviews && reviews.length > 1 && (
+                <div className="flex items-center justify-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-3">
+                  <span className="text-sm font-medium text-foreground/80">Média do casal</span>
+                  <StarRating
+                    value={reviews.reduce((a, b) => a + b.rating, 0) / reviews.length}
+                    readOnly
+                    size={18}
+                  />
+                  <span className="font-serif text-lg text-primary">
+                    {(reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)}
+                  </span>
+                </div>
+              )}
+
+              <div className="rounded-2xl border border-border bg-card p-4">
+                <p className="font-serif text-base">
+                  {myReview ? "Sua avaliação" : "Adicionar avaliação"}
+                </p>
+                <div className="mt-2">
+                  <StarRating value={rating} onChange={setRating} size={22} />
+                </div>
+                <Textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  rows={2}
+                  placeholder="O que achou?"
+                  className="mt-3 rounded-xl"
+                />
+                <Button
+                  size="sm"
+                  onClick={saveReview}
+                  disabled={rating === 0}
+                  className="mt-3 rounded-full"
+                >
+                  Salvar avaliação
+                </Button>
               </div>
-            )}
+            </div>
 
             <div className="flex justify-between border-t border-border pt-4">
               <Button
