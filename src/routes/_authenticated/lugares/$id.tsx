@@ -65,8 +65,14 @@ function PlaceDetailPage() {
       const { data } = await supabase
         .from("place_reviews")
         .select("id, rating, comment, user_id, created_at, profiles:user_id(display_name, avatar_url)")
-        .eq("place_id", id);
-      return data ?? [];
+        .eq("place_id", id)
+        .order("created_at", { ascending: false });
+      const seen = new Set<string>();
+      return (data ?? []).filter((r) => {
+        if (seen.has(r.user_id)) return false;
+        seen.add(r.user_id);
+        return true;
+      });
     },
   });
 
@@ -381,11 +387,12 @@ function ReviewForm({ placeId, existing }: { placeId: string; existing: Existing
     if (!user || rating === 0) return;
     setBusy(true);
     const payload = { rating, comment: comment || null };
-    const { error } = existing
-      ? await supabase.from("place_reviews").update(payload).eq("id", existing.id)
-      : await supabase
-          .from("place_reviews")
-          .insert({ place_id: placeId, user_id: user.id, ...payload });
+    const { error } = await supabase
+      .from("place_reviews")
+      .upsert(
+        { place_id: placeId, user_id: user.id, ...payload },
+        { onConflict: "place_id,user_id" }
+      );
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Avaliação salva");

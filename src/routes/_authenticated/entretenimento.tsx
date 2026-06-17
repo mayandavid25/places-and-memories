@@ -282,7 +282,12 @@ function EntDetailDialog({
         )
         .eq("item_id", id)
         .order("created_at", { ascending: false });
-      return data ?? [];
+      const seen = new Set<string>();
+      return (data ?? []).filter((r) => {
+        if (seen.has(r.user_id)) return false;
+        seen.add(r.user_id);
+        return true;
+      });
     },
   });
 
@@ -387,11 +392,12 @@ function EntDetailDialog({
   const saveReview = async () => {
     if (!user || rating === 0) return;
     const payload = { rating, comment: newComment || null };
-    const { error } = myReview
-      ? await supabase.from("entertainment_reviews").update(payload).eq("id", myReview.id)
-      : await supabase
-          .from("entertainment_reviews")
-          .insert({ item_id: id, user_id: user.id, ...payload });
+    const { error } = await supabase
+      .from("entertainment_reviews")
+      .upsert(
+        { item_id: id, user_id: user.id, ...payload },
+        { onConflict: "item_id,user_id" }
+      );
     if (error) return toast.error(error.message);
     toast.success("Avaliação salva");
     qc.invalidateQueries({ queryKey: ["ent-reviews", id] });
