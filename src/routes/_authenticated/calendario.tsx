@@ -92,7 +92,7 @@ useEffect(() => {
         action={
           <Dialog open={openNew} onOpenChange={setOpenNew}>
             <DialogTrigger asChild>
-              <Button className="rounded-full"><Plus className="mr-1 h-4 w-4" /> Evento</Button>
+              <Button className="hidden md:flex rounded-full"><Plus className="mr-1 h-4 w-4" /> Evento</Button>
             </DialogTrigger>
             <EventFormDialog
               key={openNew ? "new-open" : "new-closed"}

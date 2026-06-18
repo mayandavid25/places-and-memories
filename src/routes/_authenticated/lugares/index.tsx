@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,9 @@ import { WishlistContent } from "@/routes/_authenticated/wishlist";
 
 export const Route = createFileRoute("/_authenticated/lugares/")({
   component: LugaresPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: (search.tab as string) ?? "visitados",
+  }),
 });
 
 type PlaceRow = {
@@ -36,6 +39,8 @@ function LugaresPage() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<PlaceCategory | "all">("all");
   const [minRating, setMinRating] = useState(0);
+  const { tab } = useSearch({ from: "/_authenticated/lugares/" });
+  const [openWishlistNew, setOpenWishlistNew] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["places", coupleId],
@@ -70,13 +75,13 @@ function LugaresPage() {
         title="Lugares"
         subtitle="Tudo que já visitamos juntos."
         action={
-          <Button onClick={() => navigate({ to: "/lugares/novo" })} className="rounded-full">
+          <Button onClick={() => tab === "wishlist" ? setOpenWishlistNew(true) : navigate({ to: "/lugares/novo" })} className="hidden md:flex rounded-full">
             <Plus className="mr-1 h-4 w-4" /> Adicionar
           </Button>
         }
       />
 
-      <Tabs defaultValue="visitados" className="w-full">
+      <Tabs value={tab ?? "visitados"} onValueChange={(v) => navigate({ to: "/lugares", search: { tab: v } as any })} className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="visitados">Visitados</TabsTrigger>
           <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
@@ -128,7 +133,7 @@ function LugaresPage() {
         </TabsContent>
 
         <TabsContent value="wishlist" className="mt-0">
-          <WishlistContent embedded />
+          <WishlistContent embedded openNew={openWishlistNew} onOpenNewChange={setOpenWishlistNew} />
         </TabsContent>
       </Tabs>
     </PageShell>

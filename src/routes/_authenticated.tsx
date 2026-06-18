@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated")({
 const navItems = [
   { to: "/home", label: "Home", icon: Home },
   { to: "/lugares", label: "Lugares", icon: MapPin },
-  { to: "/wishlist", label: "Wishlist", icon: Heart },
+  { to: "/lugares", label: "Wishlist", icon: Heart },
   { to: "/receitas", label: "Receitas", icon: ChefHat },
   { to: "/ranking", label: "Ranking", icon: Trophy },
   { to: "/entretenimento", label: "Entretenimento", icon: Tv },
@@ -25,6 +25,8 @@ function AuthenticatedLayout() {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
+  const isWishlistTab = pathname === "/lugares" && searchStr.includes("tab=wishlist");
 
   useEffect(() => {
     if (loading) return;
@@ -66,7 +68,29 @@ function AuthenticatedLayout() {
         <nav className="flex-1 px-3">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const active = pathname === item.to || pathname.startsWith(item.to + "/");
+            const active = item.label === "Wishlist"
+              ? isWishlistTab
+              : item.to === "/lugares"
+              ? (pathname === item.to || pathname.startsWith(item.to + "/")) && !isWishlistTab
+              : pathname === item.to || pathname.startsWith(item.to + "/");
+            if (item.label === "Wishlist") {
+              return (
+                <Link
+                  key="wishlist"
+                  to="/lugares"
+                  search={{ tab: "wishlist" } as any}
+                  className={cn(
+                    "mb-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition",
+                    isWishlistTab
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground/70 hover:bg-sidebar-accent hover:text-foreground",
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              );
+            }
             return (
               <Link
                 key={item.to}

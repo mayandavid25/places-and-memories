@@ -51,9 +51,9 @@ function ReceitasPage() {
 
   const { new: isNew } = useSearch({ from: "/_authenticated/receitas" });
 
-useEffect(() => {
-  if (isNew) setCreating(true);
-}, [isNew]);
+  useEffect(() => {
+    if (isNew) setCreating(true);
+  }, [isNew]);
 
   const { data } = useQuery({
     queryKey: ["recipes", coupleId],
@@ -100,7 +100,7 @@ useEffect(() => {
         title="Receitas"
         subtitle="Coisas para cozinhar e celebrar juntos."
         action={
-          <Button onClick={() => setCreating(true)} className="rounded-full">
+          <Button onClick={() => setCreating(true)} className="hidden md:flex rounded-full">
             <Plus className="mr-1 h-4 w-4" /> Nova
           </Button>
         }
@@ -315,7 +315,6 @@ function RecipeDetailDialog({
     },
   });
 
-  // Local editable fields
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<RecipeCategory | "">("");
@@ -360,7 +359,6 @@ function RecipeDetailDialog({
     };
   }, [name, description, category, plannedDate, recipe, id, qc]);
 
-  // Photo upload
   const [uploading, setUploading] = useState(false);
   const onPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -402,7 +400,6 @@ function RecipeDetailDialog({
     qc.invalidateQueries({ queryKey: ["recipes"] });
   };
 
-  // Ingredients
   const [newIng, setNewIng] = useState("");
   const addIngredient = async () => {
     if (!newIng.trim()) return;
@@ -422,7 +419,6 @@ function RecipeDetailDialog({
     qc.invalidateQueries({ queryKey: ["recipe-ingredients", id] });
   };
 
-  // Comments
   const [newComment, setNewComment] = useState("");
   const addComment = async () => {
     if (!newComment.trim() || !user) return;
@@ -455,7 +451,6 @@ function RecipeDetailDialog({
 
         {recipe && (
           <div className="space-y-6">
-            {/* Cover + gallery */}
             <div>
               <CoverDisplay path={recipe.cover_url ?? recipe.photos?.[0] ?? null} />
               <div className="mt-3 flex flex-wrap gap-2">
@@ -481,7 +476,6 @@ function RecipeDetailDialog({
               </div>
             </div>
 
-            {/* Editable fields */}
             <div className="space-y-3">
               <div className="space-y-1.5">
                 <Label>Nome</Label>
@@ -529,7 +523,6 @@ function RecipeDetailDialog({
               </div>
             </div>
 
-            {/* Ingredients checklist */}
             <div>
               <h3 className="mb-2 font-serif text-lg">Ingredientes</h3>
               <div className="space-y-1.5">
@@ -598,7 +591,6 @@ function RecipeDetailDialog({
               </div>
             </div>
 
-            {/* Comments */}
             <div>
               <h3 className="mb-2 font-serif text-lg">Comentários</h3>
               <div className="space-y-2">

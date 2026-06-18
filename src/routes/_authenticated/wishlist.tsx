@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +21,13 @@ import { cn } from "@/lib/utils";
 import { PlaceAutocomplete } from "@/components/place-autocomplete";
 import { MapsActions } from "@/components/maps-actions";
 
-export const Route = createFileRoute("/_authenticated/wishlist")({ component: WishlistPage });
+export const Route = createFileRoute("/_authenticated/wishlist")({
+  component: function WishlistRedirect() {
+    const navigate = useNavigate();
+    useEffect(() => { void navigate({ to: "/lugares", search: { tab: "wishlist" } as any }); }, []);
+    return null;
+  },
+});
 
 type WishlistItem = {
   id: string;
@@ -54,12 +60,14 @@ function WishlistPage() {
   );
 }
 
-export function WishlistContent({ embedded = false }: { embedded?: boolean } = {}) {
+export function WishlistContent({ embedded = false, openNew: openNewProp, onOpenNewChange }: { embedded?: boolean; openNew?: boolean; onOpenNewChange?: (v: boolean) => void } = {}) {
   const { user, profile } = useAuth();
   const qc = useQueryClient();
   const coupleId = profile?.couple_id;
 
-  const [openNew, setOpenNew] = useState(false);
+  const [openNewLocal, setOpenNewLocal] = useState(false);
+  const openNew = embedded && openNewProp !== undefined ? openNewProp : openNewLocal;
+  const setOpenNew = embedded && onOpenNewChange ? onOpenNewChange : setOpenNewLocal;
   const [editing, setEditing] = useState<WishlistItem | null>(null);
 
   useEffect(() => {
@@ -124,9 +132,7 @@ export function WishlistContent({ embedded = false }: { embedded?: boolean } = {
 
   return (
     <>
-      {embedded ? (
-        <div className="mb-6 flex justify-end">{addDialog}</div>
-      ) : (
+      {embedded ? null : (
         <PageHeader
           title="Wishlist"
           subtitle="Lugares que queremos visitar."
