@@ -112,11 +112,26 @@ export function WishlistContent({ embedded = false, openNew: openNewProp, onOpen
     items: (data ?? []).filter((i) => i.status === s),
   }));
 
-  const addDialog = (
-    <Dialog open={openNew} onOpenChange={setOpenNew}>
+const addDialog = (
+    <Dialog open={openNewLocal} onOpenChange={setOpenNewLocal}>
       <DialogTrigger asChild>
         <Button className="rounded-full"><Plus className="mr-1 h-4 w-4" /> Adicionar</Button>
       </DialogTrigger>
+      <WishlistFormDialog
+        key={openNewLocal ? "new-open" : "new-closed"}
+        mode="create"
+        userId={user?.id}
+        coupleId={coupleId}
+        onSaved={() => {
+          setOpenNewLocal(false);
+          qc.invalidateQueries({ queryKey: ["wishlist"] });
+        }}
+      />
+    </Dialog>
+  );
+
+  const embeddedDialog = (
+    <Dialog open={openNew} onOpenChange={(v) => setOpenNew(v)}>
       <WishlistFormDialog
         key={openNew ? "new-open" : "new-closed"}
         mode="create"
@@ -129,9 +144,9 @@ export function WishlistContent({ embedded = false, openNew: openNewProp, onOpen
       />
     </Dialog>
   );
-
-  return (
+return (
     <>
+      {embedded && embeddedDialog}
       {embedded ? null : (
         <PageHeader
           title="Wishlist"
