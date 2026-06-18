@@ -60,18 +60,17 @@ function HomePage() {
         </h1>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-2">
-        <section className="min-w-0">
+      <div className="flex flex-col gap-8 md:grid md:grid-cols-2 w-full min-w-0">
+        <section className="min-w-0 w-full overflow-hidden">
           <SectionTitle icon={<MapPin className="h-3.5 w-3.5" />} title="Últimos lugares" link="/lugares" />
-          <div className="grid grid-cols-2 gap-3">
-
+          <div className="grid gap-2 w-full" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
             {(data?.places ?? []).map((p, idx) => (
               <Link
                 key={p.id}
                 to="/lugares/$id"
                 params={{ id: p.id }}
                 className={cn(
-                  "group block min-w-0 overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-md",
+                  "group block w-full min-w-0 overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-md",
                   idx >= 4 && "hidden md:block",
                 )}
               >

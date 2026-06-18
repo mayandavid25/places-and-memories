@@ -57,7 +57,7 @@ export function MobileNav() {
         className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 backdrop-blur md:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
-        <div className="mx-auto grid max-w-md grid-cols-5 items-center px-2 py-2">
+        <div className="grid w-full grid-cols-5 items-center px-2 py-2">
           {bottomItems.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.to || pathname.startsWith(item.to + "/");
