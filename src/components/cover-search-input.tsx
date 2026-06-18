@@ -11,9 +11,9 @@ type Props = {
   onChange: (v: string) => void;
   onPick: (r: CoverResult) => void;
   placeholder?: string;
+  inputRef?: React.RefObject<HTMLInputElement | null>;
 };
-
-export function CoverSearchInput({ type, value, onChange, onPick, placeholder }: Props) {
+export function CoverSearchInput({ type, value, onChange, onPick, placeholder, inputRef }: Props) {
   const fn = useServerFn(searchCovers);
   const [results, setResults] = useState<CoverResult[]>([]);
   const [open, setOpen] = useState(false);
@@ -49,12 +49,13 @@ export function CoverSearchInput({ type, value, onChange, onPick, placeholder }:
   return (
     <div ref={wrapRef} className="relative flex-1">
       <Input
-        value={value}
-        onChange={(e) => { onChange(e.target.value); run(e.target.value); }}
-        onFocus={() => results.length > 0 && setOpen(true)}
-        placeholder={placeholder}
-        className="h-10 rounded-xl pr-9"
-      />
+  ref={inputRef}
+  value={value}
+  onChange={(e) => { onChange(e.target.value); run(e.target.value); }}
+  onFocus={() => results.length > 0 && setOpen(true)}
+  placeholder={placeholder}
+  className="h-10 rounded-xl pr-9"
+/>
       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
       </span>

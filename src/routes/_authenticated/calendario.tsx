@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +21,12 @@ import { PlaceAutocomplete } from "@/components/place-autocomplete";
 import { MapsActions } from "@/components/maps-actions";
 import { useSignedUrl } from "@/hooks/use-signed-url";
 
-export const Route = createFileRoute("/_authenticated/calendario")({ component: CalendarPage });
+export const Route = createFileRoute("/_authenticated/calendario")({
+  component: CalendarPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    new: search.new ? Number(search.new) : undefined,
+  }),
+});
 
 type EventRow = {
   id: string;
@@ -55,12 +60,11 @@ function CalendarPage() {
   const [openNew, setOpenNew] = useState(false);
   const [editing, setEditing] = useState<EventRow | null>(null);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("new")) {
-      setOpenNew(true);
-      window.history.replaceState(null, "", window.location.pathname);
-    }
-  }, []);
+  const { new: isNew } = useSearch({ from: "/_authenticated/calendario" });
+
+useEffect(() => {
+  if (isNew) setOpenNew(true);
+}, [isNew]);
 
   const { data: events } = useQuery({
     queryKey: ["events", coupleId],

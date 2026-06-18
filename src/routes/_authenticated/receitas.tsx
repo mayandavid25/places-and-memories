@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +24,9 @@ import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/_authenticated/receitas")({
   component: ReceitasPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    new: search.new ? Number(search.new) : undefined,
+  }),
 });
 
 type RecipeRow = {
@@ -46,12 +49,11 @@ function ReceitasPage() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("new")) {
-      setCreating(true);
-      window.history.replaceState(null, "", window.location.pathname);
-    }
-  }, []);
+  const { new: isNew } = useSearch({ from: "/_authenticated/receitas" });
+
+useEffect(() => {
+  if (isNew) setCreating(true);
+}, [isNew]);
 
   const { data } = useQuery({
     queryKey: ["recipes", coupleId],

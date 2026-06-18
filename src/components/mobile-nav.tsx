@@ -30,12 +30,40 @@ const quickActions = [
   { to: "/calendario", label: "Adicionar evento", icon: CalendarPlus, search: { new: 1 } },
 ] as const;
 
+// Mapa de pathname → ação direta do FAB
+const directActions: Record<string, { to: string; search?: Record<string, number>; scroll?: boolean }> = {
+  "/lugares": { to: "/lugares/novo" },
+  "/wishlist": { to: "/wishlist", search: { new: 1 } },
+  "/receitas": { to: "/receitas", search: { new: 1 } },
+  "/entretenimento": { to: "/entretenimento", scroll: true },
+  "/calendario": { to: "/calendario", search: { new: 1 } },
+};
 
 export function MobileNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const [fabOpen, setFabOpen] = useState(false);
 
+  // Verifica se a página atual tem uma ação direta
+  const currentDirect = Object.entries(directActions).find(([path]) =>
+    pathname === path || pathname.startsWith(path + "/")
+  )?.[1];
+
+  const handleFab = () => {
+  if (currentDirect) {
+    if (currentDirect.scroll) {
+      const main = document.querySelector("main");
+      main?.scrollTo({ top: 0, behavior: "smooth" });
+      main?.addEventListener("scrollend", () => {
+        document.querySelector<HTMLInputElement>("main input")?.focus();
+      }, { once: true });
+    } else {
+      void navigate({ to: currentDirect.to as any, search: currentDirect.search as any });
+    }
+  } else {
+    setFabOpen(true);
+  }
+};
 
   return (
     <>
@@ -43,7 +71,7 @@ export function MobileNav() {
       <button
         type="button"
         aria-label="Ações rápidas"
-        onClick={() => setFabOpen(true)}
+        onClick={handleFab}
         className={cn(
           "fixed right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition active:scale-95 md:hidden",
         )}
@@ -78,8 +106,7 @@ export function MobileNav() {
         </div>
       </nav>
 
-
-      {/* FAB quick-actions sheet */}
+      {/* FAB quick-actions sheet — só aparece na home e páginas sem ação direta */}
       <Sheet open={fabOpen} onOpenChange={setFabOpen}>
         <SheetContent
           side="bottom"
