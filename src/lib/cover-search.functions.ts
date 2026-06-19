@@ -13,21 +13,40 @@ const inputSchema = z.object({
   type: z.enum(["filme", "serie", "jogo", "livro"]),
 });
 
-async function searchITunes(query: string, entity: "movie" | "tvShow"): Promise<CoverResult[]> {
-  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=${entity}&limit=8`;
-  const res = await fetch(url);
+const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
+
+async function searchTmdb(query: string, kind: "movie" | "tv"): Promise<CoverResult[]> {
+  const token = process.env.TMDB_API_TOKEN;
+  if (!token) {
+    console.error("TMDB_API_TOKEN não está configurado nas env vars do servidor.");
+    return [];
+  }
+
+  const endpoint = kind === "movie" ? "search/movie" : "search/tv";
+  const url = `https://api.themoviedb.org/3/${endpoint}?query=${encodeURIComponent(query)}&language=pt-BR`;
+
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
   if (!res.ok) return [];
-  const json = (await res.json()) as { results: Array<Record<string, unknown>> };
-  return (json.results ?? []).map((r) => {
-    const art = (r.artworkUrl100 as string | undefined) ?? null;
-    const big = art ? art.replace("100x100bb", "600x600bb") : null;
-    return {
-      title: (r.trackName as string) ?? (r.collectionName as string) ?? "",
-      year: r.releaseDate ? String(r.releaseDate).slice(0, 4) : null,
-      cover_url: big,
-      source: "itunes",
-    };
-  }).filter((r) => r.title);
+
+  const json = (await res.json()) as { results?: Array<Record<string, unknown>> };
+  return (json.results ?? [])
+    .map((r) => {
+      const posterPath = r.poster_path as string | null | undefined;
+      const title = kind === "movie" ? (r.title as string) : (r.name as string);
+      const dateField = kind === "movie" ? r.release_date : r.first_air_date;
+      return {
+        title: title ?? "",
+        year: dateField ? String(dateField).slice(0, 4) : null,
+        cover_url: posterPath ? `${TMDB_IMAGE_BASE}${posterPath}` : null,
+        source: "tmdb",
+      };
+    })
+    .filter((r) => r.title);
 }
 
 async function searchOpenLibrary(query: string): Promise<CoverResult[]> {
@@ -47,8 +66,13 @@ async function searchOpenLibrary(query: string): Promise<CoverResult[]> {
 }
 
 async function searchRawg(query: string): Promise<CoverResult[]> {
-  // RAWG public API supports anonymous limited requests
-  const url = `https://api.rawg.io/api/games?search=${encodeURIComponent(query)}&page_size=8`;
+  const apiKey = process.env.RAWG_API_KEY;
+  if (!apiKey) {
+    console.error("RAWG_API_KEY não está configurado nas env vars do servidor.");
+    return [];
+  }
+
+  const url = `https://api.rawg.io/api/games?key=${apiKey}&search=${encodeURIComponent(query)}&page_size=8`;
   const res = await fetch(url);
   if (!res.ok) return [];
   const json = (await res.json()) as { results?: Array<Record<string, unknown>> };
@@ -66,12 +90,13 @@ export const searchCovers = createServerFn({ method: "POST" })
     const { query, type } = data;
     try {
       let results: CoverResult[] = [];
-      if (type === "filme") results = await searchITunes(query, "movie");
-      else if (type === "serie") results = await searchITunes(query, "tvShow");
+      if (type === "filme") results = await searchTmdb(query, "movie");
+      else if (type === "serie") results = await searchTmdb(query, "tv");
       else if (type === "livro") results = await searchOpenLibrary(query);
       else if (type === "jogo") results = await searchRawg(query);
       return { results: results.filter((r) => r.cover_url).slice(0, 8) };
-    } catch {
+    } catch (err) {
+      console.error("Erro ao buscar capas:", err);
       return { results: [] as CoverResult[] };
     }
   });
