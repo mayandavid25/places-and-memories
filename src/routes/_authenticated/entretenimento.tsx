@@ -85,6 +85,7 @@ function EntList({ type }: { type: EntertainmentType }) {
   const [title, setTitle] = useState("");
   const [pendingCover, setPendingCover] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const { data } = useQuery({
     queryKey: ["ent", coupleId, type],
@@ -137,6 +138,7 @@ function EntList({ type }: { type: EntertainmentType }) {
         <CoverSearchInput
           type={type}
           value={title}
+          inputRef={inputRef}
           onChange={(v) => { setTitle(v); if (!v) setPendingCover(null); }}
           onPick={(r) => { setTitle(r.title); setPendingCover(r.cover_url); }}
           placeholder={`Adicionar ${ENT_LABEL[type].toLowerCase().slice(0, -1)}...`}
@@ -310,7 +312,6 @@ function EntDetailDialog({
     }
   }, [item?.id, item?.title, item?.description, item?.status, item?.progress_current, item?.progress_total, item?.progress_note]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Autosave
   const debouncedRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (!item) return;
@@ -346,7 +347,6 @@ function EntDetailDialog({
     };
   }, [title, description, status, progressCurrent, progressTotal, progressNote, item, id, qc, progressUnitLabel.unit]);
 
-  // Cover upload
   const [uploading, setUploading] = useState(false);
   const onCover = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -357,7 +357,6 @@ function EntDetailDialog({
       const path = `couples/${coupleId}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("photos").upload(path, file, { upsert: false });
       if (error) throw error;
-      // remove previous cover from storage
       if (item.cover_url) {
         void supabase.storage.from("photos").remove([item.cover_url]);
       }
@@ -380,7 +379,6 @@ function EntDetailDialog({
     qc.invalidateQueries({ queryKey: ["ent"] });
   };
 
-  // Review
   const myReview = reviews?.find((r) => r.user_id === user?.id);
   const [rating, setRating] = useState(0);
   const [newComment, setNewComment] = useState("");
@@ -423,7 +421,6 @@ function EntDetailDialog({
 
         {item && (
           <div className="space-y-5">
-            {/* Cover */}
             <div className="flex gap-4">
               <div className="relative aspect-[2/3] w-32 shrink-0 overflow-hidden rounded-2xl bg-muted">
                 {coverUrl ? (
@@ -436,13 +433,7 @@ function EntDetailDialog({
               </div>
               <div className="flex flex-col gap-2">
                 <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs hover:border-primary">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={onCover}
-                    disabled={uploading}
-                  />
+                  <input type="file" accept="image/*" className="hidden" onChange={onCover} disabled={uploading} />
                   <Upload className="h-3.5 w-3.5" />
                   {item.cover_url ? "Trocar capa" : "Adicionar capa"}
                 </label>
@@ -457,14 +448,9 @@ function EntDetailDialog({
               </div>
             </div>
 
-            {/* Editable fields */}
             <div className="space-y-1.5">
               <Label>Título</Label>
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="h-11 rounded-xl"
-              />
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} className="h-11 rounded-xl" />
             </div>
 
             <div className="space-y-1.5">
@@ -475,9 +461,7 @@ function EntDetailDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(ENT_STATUS_LABEL).map(([v, l]) => (
-                    <SelectItem key={v} value={v}>
-                      {l}
-                    </SelectItem>
+                    <SelectItem key={v} value={v}>{l}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -485,100 +469,51 @@ function EntDetailDialog({
 
             <div className="space-y-1.5">
               <Label>Descrição</Label>
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={2}
-                placeholder="Sinopse, observações…"
-                className="rounded-xl"
-              />
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="Sinopse, observações…" className="rounded-xl" />
             </div>
 
-            {/* Progress block - shown when consumindo */}
             {status === "consumindo" && (
               <div className="rounded-2xl border border-border bg-card/60 p-4">
-                <h4 className="mb-3 font-serif text-base italic text-foreground">
-                  Onde paramos
-                </h4>
+                <h4 className="mb-3 font-serif text-base italic text-foreground">Onde paramos</h4>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label className="text-xs">
-                      {progressUnitLabel.label} atual
-                    </Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={progressCurrent}
-                      onChange={(e) => setProgressCurrent(e.target.value)}
-                      placeholder="0"
-                      className="h-10 rounded-xl"
-                    />
+                    <Label className="text-xs">{progressUnitLabel.label} atual</Label>
+                    <Input type="number" min={0} value={progressCurrent} onChange={(e) => setProgressCurrent(e.target.value)} placeholder="0" className="h-10 rounded-xl" />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Total ({progressUnitLabel.unit})</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={progressTotal}
-                      onChange={(e) => setProgressTotal(e.target.value)}
-                      placeholder="—"
-                      className="h-10 rounded-xl"
-                    />
+                    <Input type="number" min={0} value={progressTotal} onChange={(e) => setProgressTotal(e.target.value)} placeholder="—" className="h-10 rounded-xl" />
                   </div>
                 </div>
                 <div className="mt-3 space-y-1.5">
                   <Label className="text-xs">Nota livre</Label>
-                  <Textarea
-                    value={progressNote}
-                    onChange={(e) => setProgressNote(e.target.value)}
-                    rows={2}
-                    placeholder="Ex.: Temporada 2, ep. 4 — paramos aos 25min"
-                    className="rounded-xl"
-                  />
+                  <Textarea value={progressNote} onChange={(e) => setProgressNote(e.target.value)} rows={2} placeholder="Ex.: Temporada 2, ep. 4 — paramos aos 25min" className="rounded-xl" />
                 </div>
                 {progressTotal && progressCurrent && (
                   <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full bg-primary transition-all"
-                      style={{
-                        width: `${Math.min(100, Math.round((Number(progressCurrent) / Number(progressTotal)) * 100))}%`,
-                      }}
-                    />
+                    <div className="h-full bg-primary transition-all" style={{ width: `${Math.min(100, Math.round((Number(progressCurrent) / Number(progressTotal)) * 100))}%` }} />
                   </div>
                 )}
               </div>
             )}
 
-            {/* Reviews: individuais → média → form */}
             <div className="space-y-3">
               <h4 className="font-serif text-base italic">Avaliações</h4>
-
               {reviews && reviews.length > 0 ? (
                 <div className="space-y-2">
                   {reviews.map((r) => {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const prof = (r as any).profiles;
                     return (
-                      <div
-                        key={r.id}
-                        className="flex items-start gap-3 rounded-xl border border-border bg-card p-3"
-                      >
-                        <UserAvatar
-                          name={prof?.display_name}
-                          src={prof?.avatar_url}
-                          size={32}
-                        />
+                      <div key={r.id} className="flex items-start gap-3 rounded-xl border border-border bg-card p-3">
+                        <UserAvatar name={prof?.display_name} src={prof?.avatar_url} size={32} />
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-medium">{prof?.display_name}</p>
                             <StarRating value={r.rating} readOnly size={11} />
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(r.created_at), "d MMM", { locale: ptBR })}
-                            </span>
+                            <span className="text-xs text-muted-foreground">{format(new Date(r.created_at), "d MMM", { locale: ptBR })}</span>
                           </div>
-                          {r.comment && (
-                            <p className="mt-1 text-sm text-foreground/85">{r.comment}</p>
-                          )}
+                          {r.comment && <p className="mt-1 text-sm text-foreground/85">{r.comment}</p>}
                         </div>
                       </div>
                     );
@@ -591,11 +526,7 @@ function EntDetailDialog({
               {reviews && reviews.length > 1 && (
                 <div className="flex items-center justify-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-3">
                   <span className="text-sm font-medium text-foreground/80">Média do casal</span>
-                  <StarRating
-                    value={reviews.reduce((a, b) => a + b.rating, 0) / reviews.length}
-                    readOnly
-                    size={18}
-                  />
+                  <StarRating value={reviews.reduce((a, b) => a + b.rating, 0) / reviews.length} readOnly size={18} />
                   <span className="font-serif text-lg text-primary">
                     {(reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)}
                   </span>
@@ -603,36 +534,19 @@ function EntDetailDialog({
               )}
 
               <div className="rounded-2xl border border-border bg-card p-4">
-                <p className="font-serif text-base">
-                  {myReview ? "Sua avaliação" : "Adicionar avaliação"}
-                </p>
+                <p className="font-serif text-base">{myReview ? "Sua avaliação" : "Adicionar avaliação"}</p>
                 <div className="mt-2">
                   <StarRating value={rating} onChange={setRating} size={22} />
                 </div>
-                <Textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  rows={2}
-                  placeholder="O que achou?"
-                  className="mt-3 rounded-xl"
-                />
-                <Button
-                  size="sm"
-                  onClick={saveReview}
-                  disabled={rating === 0}
-                  className="mt-3 rounded-full"
-                >
+                <Textarea value={newComment} onChange={(e) => setNewComment(e.target.value)} rows={2} placeholder="O que achou?" className="mt-3 rounded-xl" />
+                <Button size="sm" onClick={saveReview} disabled={rating === 0} className="mt-3 rounded-full">
                   Salvar avaliação
                 </Button>
               </div>
             </div>
 
             <div className="flex justify-between border-t border-border pt-4">
-              <Button
-                variant="ghost"
-                onClick={removeItem}
-                className={cn("text-muted-foreground hover:text-destructive")}
-              >
+              <Button variant="ghost" onClick={removeItem} className={cn("text-muted-foreground hover:text-destructive")}>
                 <Trash2 className="mr-1 h-4 w-4" /> Excluir
               </Button>
               <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl">

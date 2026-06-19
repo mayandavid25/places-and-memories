@@ -11,7 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Trash2, Upload, X, MapPin, Calendar as CalendarIcon, Lock } from "lucide-react";
+import { Plus, Trash2, Upload, X, MapPin, Calendar as CalendarIcon, Lock, Star } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { StarRating } from "@/components/star-rating";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -69,6 +71,11 @@ export function WishlistContent({ embedded = false, openNew: openNewProp, onOpen
   const openNew = embedded && openNewProp !== undefined ? openNewProp : openNewLocal;
   const setOpenNew = embedded && onOpenNewChange ? onOpenNewChange : setOpenNewLocal;
   const [editing, setEditing] = useState<WishlistItem | null>(null);
+  const [linkedPlaceId, setLinkedPlaceId] = useState<string | null>(null);
+  const [reviewSheetOpen, setReviewSheetOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [savingReview, setSavingReview] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("new")) {
@@ -95,9 +102,43 @@ export function WishlistContent({ embedded = false, openNew: openNewProp, onOpen
   const setStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("wishlist_items").update({ status: status as never }).eq("id", id);
     if (error) return toast.error(error.message);
-    if (status === "visitado") toast.success("Marcado como visitado — adicionado em Lugares ✨");
     qc.invalidateQueries({ queryKey: ["wishlist"] });
-    qc.invalidateQueries({ queryKey: ["places"] });
+
+    if (status === "visitado") {
+      const item = (data ?? []).find((i) => i.id === id);
+      if (!item) return;
+
+      if (item.linked_place_id) {
+        setLinkedPlaceId(item.linked_place_id);
+        setReviewSheetOpen(true);
+        return;
+      }
+
+      const { data: newPlace, error: placeError } = await supabase.from("places").insert({
+        couple_id: item.couple_id,
+        name: item.name,
+        category: item.category,
+        location: item.location,
+        formatted_address: item.formatted_address,
+        lat: item.lat,
+        lng: item.lng,
+        photos: item.photos ?? [],
+      } as never).select().single();
+
+      if (placeError) {
+        toast.error(placeError.message);
+        return;
+      }
+
+      await supabase.from("wishlist_items").update({ linked_place_id: newPlace.id }).eq("id", id);
+      qc.invalidateQueries({ queryKey: ["places"] });
+
+      setLinkedPlaceId(newPlace.id);
+      setReviewRating(0);
+      setReviewComment("");
+      setReviewSheetOpen(true);
+      toast.success("Lugar adicionado! Que tal deixar uma avaliação? ✨");
+    }
   };
 
   const remove = async (id: string) => {
@@ -105,6 +146,20 @@ export function WishlistContent({ embedded = false, openNew: openNewProp, onOpen
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["wishlist"] });
     setEditing(null);
+  };
+
+  const saveReview = async () => {
+    if (!user || reviewRating === 0 || !linkedPlaceId) return;
+    setSavingReview(true);
+    const { error } = await supabase.from("place_reviews").upsert(
+      { place_id: linkedPlaceId, user_id: user.id, rating: reviewRating, comment: reviewComment || null },
+      { onConflict: "place_id,user_id" }
+    );
+    setSavingReview(false);
+    if (error) return toast.error(error.message);
+    toast.success("Avaliação salva!");
+    setReviewSheetOpen(false);
+    qc.invalidateQueries({ queryKey: ["place-reviews", linkedPlaceId] });
   };
 
   const groups = (["queremos_visitar", "planejado", "visitado"] as const).map((s) => ({
@@ -147,6 +202,40 @@ const addDialog = (
 return (
     <>
       {embedded && embeddedDialog}
+
+      <Sheet open={reviewSheetOpen} onOpenChange={setReviewSheetOpen}>
+        <SheetContent side="bottom" className="rounded-t-3xl">
+          <SheetHeader>
+            <SheetTitle className="font-serif text-xl">Como foi?</SheetTitle>
+          </SheetHeader>
+          <div className="mt-4 space-y-4 pb-6">
+            <p className="text-sm text-muted-foreground">Deixa uma avaliação do lugar — é opcional!</p>
+            <div>
+              <Label className="mb-2 block text-sm">Nota</Label>
+              <StarRating value={reviewRating} onChange={setReviewRating} size={28} />
+            </div>
+            <div>
+              <Label className="mb-2 block text-sm">Comentário</Label>
+              <Textarea
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                placeholder="O que acharam?"
+                rows={3}
+                className="rounded-xl"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setReviewSheetOpen(false)} className="flex-1 rounded-xl">
+                Pular
+              </Button>
+              <Button onClick={saveReview} disabled={savingReview || reviewRating === 0} className="flex-1 rounded-xl">
+                {savingReview ? "Salvando..." : "Salvar avaliação"}
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
       {embedded ? null : (
         <PageHeader
           title="Wishlist"
