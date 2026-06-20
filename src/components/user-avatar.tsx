@@ -13,7 +13,7 @@ export function UserAvatar({
   size?: number;
   className?: string;
 }) {
-  const url = useSignedUrl(src ?? null);
+  const url = useSignedUrl(src ?? null, 150);
   return (
     <div
       className={cn("inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full text-[0.65rem] font-medium uppercase text-foreground/80", className)}
