@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { StarRating } from "@/components/star-rating";
+import { ScoreInput } from "@/components/score-input";
 import { UserAvatar } from "@/components/user-avatar";
 import { useSignedUrl } from "@/hooks/use-signed-url";
 import { CATEGORIES, CATEGORY_LABEL, type PlaceCategory } from "@/lib/categories";
@@ -183,7 +183,7 @@ function PlaceDetailPage() {
     const { error } = await supabase.from("places").delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Removido");
-    void navigate({ to: "/lugares" });
+    void navigate({ to: "/lugares", search: { tab: "visitados" } });
   };
 
   if (!place)
@@ -199,7 +199,7 @@ function PlaceDetailPage() {
     <PageShell className="max-w-3xl">
       <div className="mb-4 flex items-center justify-between">
         <button
-          onClick={() => navigate({ to: "/lugares" })}
+          onClick={() => navigate({ to: "/lugares", search: { tab: "visitados" } })}
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
         >
           <ArrowLeft className="h-4 w-4" /> Lugares
@@ -319,7 +319,7 @@ function PlaceDetailPage() {
                       <UserAvatar name={prof?.display_name} src={prof?.avatar_url} size={36} />
                       <div className="flex-1">
                         <p className="text-sm font-medium">{prof?.display_name}</p>
-                        <StarRating value={r.rating} readOnly size={12} />
+                        <ScoreInput value={r.rating} readOnly />
                       </div>
                     </div>
                     {r.comment && (
@@ -332,14 +332,10 @@ function PlaceDetailPage() {
             {reviews.length > 1 && (
               <div className="mt-4 flex items-center justify-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4">
                 <span className="text-sm font-medium text-foreground/80">Média do casal</span>
-                <StarRating
-                  value={reviews.reduce((a, b) => a + b.rating, 0) / reviews.length}
+                <ScoreInput
+                  value={Math.round((reviews.reduce((a, b) => a + b.rating, 0) / reviews.length) * 2) / 2}
                   readOnly
-                  size={18}
                 />
-                <span className="font-serif text-lg text-primary">
-                  {(reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)}
-                </span>
               </div>
             )}
           </>
@@ -396,7 +392,7 @@ function ReviewForm({ placeId, existing }: { placeId: string; existing: Existing
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Avaliação salva");
-    qc.invalidateQueries({ queryKey: ["place-reviews", placeId] });
+    await qc.refetchQueries({ queryKey: ["place-reviews", placeId] });
     qc.invalidateQueries({ queryKey: ["places"] });
   };
 
@@ -404,7 +400,7 @@ function ReviewForm({ placeId, existing }: { placeId: string; existing: Existing
     <div className="mt-8 rounded-2xl border border-border bg-card p-5">
       <h3 className="font-serif text-lg">{existing ? "Sua avaliação" : "Adicionar avaliação"}</h3>
       <div className="mt-3">
-        <StarRating value={rating} onChange={setRating} size={22} />
+        <ScoreInput value={rating} onChange={setRating} />
       </div>
       <Textarea
         value={comment}
