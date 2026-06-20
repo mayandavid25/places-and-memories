@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { StarRating } from "@/components/star-rating";
+import { ScoreInput } from "@/components/score-input";
 import { UserAvatar } from "@/components/user-avatar";
 import { useSignedUrl } from "@/hooks/use-signed-url";
 import {
@@ -237,7 +237,7 @@ function EntCard({
       <div className="p-3">
         <p className="line-clamp-1 text-sm font-medium">{item.title}</p>
         <div className="mt-1">
-          <StarRating value={myReview ? avg : 0} readOnly size={11} />
+          <ScoreInput value={myReview ? avg : 0} readOnly />
         </div>
       </div>
     </button>
@@ -510,7 +510,7 @@ function EntDetailDialog({
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-medium">{prof?.display_name}</p>
-                            <StarRating value={r.rating} readOnly size={11} />
+                            <ScoreInput value={r.rating} readOnly />
                             <span className="text-xs text-muted-foreground">{format(new Date(r.created_at), "d MMM", { locale: ptBR })}</span>
                           </div>
                           {r.comment && <p className="mt-1 text-sm text-foreground/85">{r.comment}</p>}
@@ -526,7 +526,7 @@ function EntDetailDialog({
               {reviews && reviews.length > 1 && (
                 <div className="flex items-center justify-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-3">
                   <span className="text-sm font-medium text-foreground/80">Média do casal</span>
-                  <StarRating value={reviews.reduce((a, b) => a + b.rating, 0) / reviews.length} readOnly size={18} />
+                  <ScoreInput value={Math.round((reviews.reduce((a, b) => a + b.rating, 0) / reviews.length) * 2) / 2} readOnly />
                   <span className="font-serif text-lg text-primary">
                     {(reviews.reduce((a, b) => a + b.rating, 0) / reviews.length).toFixed(1)}
                   </span>
@@ -536,7 +536,7 @@ function EntDetailDialog({
               <div className="rounded-2xl border border-border bg-card p-4">
                 <p className="font-serif text-base">{myReview ? "Sua avaliação" : "Adicionar avaliação"}</p>
                 <div className="mt-2">
-                  <StarRating value={rating} onChange={setRating} size={22} />
+                  <ScoreInput value={rating} onChange={setRating} />
                 </div>
                 <Textarea value={newComment} onChange={(e) => setNewComment(e.target.value)} rows={2} placeholder="O que achou?" className="mt-3 rounded-xl" />
                 <Button size="sm" onClick={saveReview} disabled={rating === 0} className="mt-3 rounded-full">

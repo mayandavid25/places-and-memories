@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { PageHeader, PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { StarRating } from "@/components/star-rating";
+import { ScoreInput } from "@/components/score-input";
 import { useSignedUrl } from "@/hooks/use-signed-url";
 import { Heart, Plus, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -110,7 +110,7 @@ function LugaresPage() {
 
           <div className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
             Nota mínima:
-            <StarRating value={minRating} onChange={setMinRating} size={14} />
+            <ScoreInput value={minRating} onChange={setMinRating} />
             {minRating > 0 && (
               <button onClick={() => setMinRating(0)} className="ml-2 hover:text-primary">limpar</button>
             )}
@@ -176,7 +176,7 @@ function PlaceCard({ place }: { place: PlaceRow & { avg: number } }) {
         <p className="line-clamp-1 text-sm font-medium">{place.name}</p>
         <p className="text-xs capitalize text-muted-foreground">{CATEGORY_LABEL[place.category]}</p>
         <div className="mt-1.5">
-          <StarRating value={place.avg} readOnly size={11} />
+          <ScoreInput value={place.avg} readOnly />
         </div>
       </div>
     </Link>
