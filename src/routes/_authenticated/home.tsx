@@ -180,7 +180,7 @@ function SectionTitle({ icon, title, link, action }: { icon: React.ReactNode; ti
 }
 
 function PlaceCover({ path }: { path: string | null }) {
-  const url = useSignedUrl(path);
+  const url = useSignedUrl(path, 400);
   return (
     <div className="aspect-square w-full bg-muted">
       {url && <img src={url} alt="" loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />}
