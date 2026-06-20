@@ -16,7 +16,7 @@ const navItems = [
   { to: "/lugares", label: "Wishlist", icon: Heart },
   { to: "/receitas", label: "Receitas", icon: ChefHat },
   { to: "/ranking", label: "Ranking", icon: Trophy },
-  { to: "/entretenimento", label: "Entretenimento", icon: Tv },
+  { to: "/entretenimento", label: "Lazer", icon: Tv },
   { to: "/calendario", label: "Calendário", icon: Calendar },
   { to: "/perfil", label: "Perfil", icon: User },
 ] as const;

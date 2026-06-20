@@ -12,6 +12,7 @@ import { Heart, Plus, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, CATEGORY_LABEL, type PlaceCategory } from "@/lib/categories";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WishlistContent } from "@/routes/_authenticated/wishlist";
 
 export const Route = createFileRoute("/_authenticated/lugares/")({
@@ -29,7 +30,18 @@ type PlaceRow = {
   photos: string[];
   favorited: boolean;
   visited_at: string | null;
+  created_at: string;
   place_reviews: { rating: number }[];
+};
+
+type SortOption = "recent" | "oldest" | "rating" | "az" | "za";
+
+const SORT_LABEL: Record<SortOption, string> = {
+  recent: "Mais recentes",
+  oldest: "Mais antigos",
+  rating: "Melhor avaliados",
+  az: "A-Z",
+  za: "Z-A",
 };
 
 function LugaresPage() {
@@ -37,8 +49,9 @@ function LugaresPage() {
   const coupleId = profile?.couple_id;
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<PlaceCategory | "all">("all");
+  const [categories, setCategories] = useState<PlaceCategory[]>([]);
   const [minRating, setMinRating] = useState(0);
+  const [sort, setSort] = useState<SortOption>("recent");
   const { tab } = useSearch({ from: "/_authenticated/lugares/" });
   const [openWishlistNew, setOpenWishlistNew] = useState(false);
 
@@ -48,26 +61,52 @@ function LugaresPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("places")
-        .select("id, name, category, location, photos, favorited, visited_at, place_reviews(rating)")
+        .select("id, name, category, location, photos, favorited, visited_at, created_at, place_reviews(rating)")
         .eq("couple_id", coupleId!)
         .order("created_at", { ascending: false });
       return (data ?? []) as PlaceRow[];
     },
   });
 
+  const toggleCategory = (c: PlaceCategory) => {
+    setCategories((prev) =>
+      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
+    );
+  };
+
   const filtered = useMemo(() => {
     const list = data ?? [];
-    return list
-      .map((p) => {
-        const avg = p.place_reviews.length
-          ? p.place_reviews.reduce((a, b) => a + b.rating, 0) / p.place_reviews.length
-          : 0;
-        return { ...p, avg };
-      })
-      .filter((p) => (category === "all" ? true : p.category === category))
+    const withAvg = list.map((p) => {
+      const avg = p.place_reviews.length
+        ? p.place_reviews.reduce((a, b) => a + b.rating, 0) / p.place_reviews.length
+        : 0;
+      return { ...p, avg };
+    });
+
+    const result = withAvg
+      .filter((p) => (categories.length === 0 ? true : categories.includes(p.category)))
       .filter((p) => (query ? p.name.toLowerCase().includes(query.toLowerCase()) : true))
       .filter((p) => p.avg >= minRating);
-  }, [data, query, category, minRating]);
+
+    result.sort((a, b) => {
+      switch (sort) {
+        case "recent":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "rating":
+          return b.avg - a.avg;
+        case "az":
+          return a.name.localeCompare(b.name);
+        case "za":
+          return b.name.localeCompare(a.name);
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [data, query, categories, minRating, sort]);
 
   return (
     <PageShell>
@@ -88,7 +127,7 @@ function LugaresPage() {
         </TabsList>
 
         <TabsContent value="visitados" className="mt-0">
-          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -98,14 +137,25 @@ function LugaresPage() {
                 className="h-10 rounded-full pl-9"
               />
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              <Chip active={category === "all"} onClick={() => setCategory("all")}>Todos</Chip>
-              {CATEGORIES.map((c) => (
-                <Chip key={c} active={category === c} onClick={() => setCategory(c)}>
-                  {CATEGORY_LABEL[c]}
-                </Chip>
-              ))}
-            </div>
+            <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+              <SelectTrigger className="h-10 w-full rounded-full sm:w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(SORT_LABEL).map(([v, l]) => (
+                  <SelectItem key={v} value={v}>{l}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="mb-4 flex flex-wrap gap-1.5">
+            <Chip active={categories.length === 0} onClick={() => setCategories([])}>Todos</Chip>
+            {CATEGORIES.map((c) => (
+              <Chip key={c} active={categories.includes(c)} onClick={() => toggleCategory(c)}>
+                {CATEGORY_LABEL[c]}
+              </Chip>
+            ))}
           </div>
 
           <div className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">

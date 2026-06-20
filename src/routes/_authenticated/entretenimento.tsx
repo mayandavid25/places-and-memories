@@ -47,7 +47,7 @@ function EntertainmentPage() {
   const [tab, setTab] = useState<EntertainmentType>("filme");
   return (
     <PageShell>
-      <PageHeader title="Entretenimento" subtitle="Filmes, séries, jogos e livros." />
+      <PageHeader title="Lazer" subtitle="Filmes, séries, jogos e livros." />
       <Tabs value={tab} onValueChange={(v) => setTab(v as EntertainmentType)}>
         <TabsList className="mb-6 rounded-full">
           {ENT_TYPES.map((t) => (

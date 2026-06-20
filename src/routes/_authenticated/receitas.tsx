@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSignedUrl } from "@/hooks/use-signed-url";
 import { UserAvatar } from "@/components/user-avatar";
 import {
@@ -41,12 +42,22 @@ type RecipeRow = {
   created_at: string;
 };
 
+type SortOption = "recent" | "oldest" | "az" | "za";
+
+const SORT_LABEL: Record<SortOption, string> = {
+  recent: "Mais recentes",
+  oldest: "Mais antigos",
+  az: "A-Z",
+  za: "Z-A",
+};
+
 function ReceitasPage() {
   const { user, profile } = useAuth();
   const qc = useQueryClient();
   const coupleId = profile?.couple_id;
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<RecipeCategory | "all">("all");
+  const [categories, setCategories] = useState<RecipeCategory[]>([]);
+  const [sort, setSort] = useState<SortOption>("recent");
   const [openId, setOpenId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -70,12 +81,35 @@ function ReceitasPage() {
     },
   });
 
+  const toggleCategory = (c: RecipeCategory) => {
+    setCategories((prev) =>
+      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]
+    );
+  };
+
   const filtered = useMemo(() => {
     const list = data ?? [];
-    return list
-      .filter((r) => (category === "all" ? true : r.category === category))
+    const result = list
+      .filter((r) => (categories.length === 0 ? true : r.category && categories.includes(r.category)))
       .filter((r) => (query ? r.name.toLowerCase().includes(query.toLowerCase()) : true));
-  }, [data, query, category]);
+
+    result.sort((a, b) => {
+      switch (sort) {
+        case "recent":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "az":
+          return a.name.localeCompare(b.name);
+        case "za":
+          return b.name.localeCompare(a.name);
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [data, query, categories, sort]);
 
   const createRecipe = async (payload: { name: string; category: RecipeCategory | null }) => {
     if (!coupleId || !user) return;
@@ -107,7 +141,7 @@ function ReceitasPage() {
         }
       />
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -117,16 +151,27 @@ function ReceitasPage() {
             className="h-10 rounded-full pl-9"
           />
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          <Chip active={category === "all"} onClick={() => setCategory("all")}>
-            Todas
+        <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+          <SelectTrigger className="h-10 w-full rounded-full sm:w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(SORT_LABEL).map(([v, l]) => (
+              <SelectItem key={v} value={v}>{l}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="mb-6 flex flex-wrap gap-1.5">
+        <Chip active={categories.length === 0} onClick={() => setCategories([])}>
+          Todas
+        </Chip>
+        {RECIPE_CATEGORIES.map((c) => (
+          <Chip key={c} active={categories.includes(c)} onClick={() => toggleCategory(c)}>
+            {RECIPE_CATEGORY_LABEL[c]}
           </Chip>
-          {RECIPE_CATEGORIES.map((c) => (
-            <Chip key={c} active={category === c} onClick={() => setCategory(c)}>
-              {RECIPE_CATEGORY_LABEL[c]}
-            </Chip>
-          ))}
-        </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
