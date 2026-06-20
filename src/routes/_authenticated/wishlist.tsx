@@ -1,3 +1,4 @@
+import imageCompression from "browser-image-compression";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -288,7 +289,7 @@ function WishlistRow({
   item, onOpen, onStatus, onDelete,
 }: { item: WishlistItem; onOpen: () => void; onStatus: (s: string) => void; onDelete: () => void }) {
   const firstPhoto = item.photos?.[0] ?? null;
-  const thumb = useSignedUrl(firstPhoto);
+  const thumb = useSignedUrl(firstPhoto, 400);
   const address = item.formatted_address ?? item.location ?? null;
   return (
     <div className="group flex h-full flex-col gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-primary/40">
@@ -299,7 +300,7 @@ function WishlistRow({
         />
         {firstPhoto && (
           <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-muted">
-            {thumb && <img src={thumb} alt="" className="h-full w-full object-cover" />}
+            {thumb && <img src={thumb} alt="" loading="lazy" className="h-full w-full object-cover" />}
           </div>
         )}
         <button onClick={onOpen} className="min-w-0 flex-1 space-y-1.5 text-left">
@@ -408,9 +409,14 @@ function WishlistFormDialog({
     if (!file || !coupleId) return;
     setUploading(true);
     try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      });
       const ext = file.name.split(".").pop();
       const path = `couples/${coupleId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("photos").upload(path, file, { upsert: false });
+      const { error } = await supabase.storage.from("photos").upload(path, compressed, { upsert: false });
       if (error) throw error;
       setPhotos((p) => [...p, path]);
     } catch (err) {
@@ -575,10 +581,10 @@ function WishlistFormDialog({
 }
 
 function PhotoThumb({ path, onRemove }: { path: string; onRemove: () => void }) {
-  const url = useSignedUrl(path);
+  const url = useSignedUrl(path, 400);
   return (
     <div className="relative h-20 w-20 overflow-hidden rounded-xl bg-muted">
-      {url && <img src={url} alt="" className="h-full w-full object-cover" />}
+      {url && <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />}
       <button
         type="button"
         onClick={onRemove}

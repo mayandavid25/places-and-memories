@@ -1,3 +1,4 @@
+import imageCompression from "browser-image-compression";
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -318,9 +319,14 @@ function EventFormDialog({
     if (!file || !coupleId) return;
     setUploading(true);
     try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      });
       const ext = file.name.split(".").pop();
       const path = `couples/${coupleId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("photos").upload(path, file, { upsert: false });
+      const { error } = await supabase.storage.from("photos").upload(path, compressed, { upsert: false });
       if (error) throw error;
       setPhotos((p) => [...p, path]);
     } catch (err) {
@@ -494,10 +500,10 @@ function EventFormDialog({
 }
 
 function EventPhotoThumb({ path, onRemove }: { path: string; onRemove: () => void }) {
-  const url = useSignedUrl(path);
+  const url = useSignedUrl(path, 400);
   return (
     <div className="relative h-20 w-20 overflow-hidden rounded-xl bg-muted">
-      {url && <img src={url} alt="" className="h-full w-full object-cover" />}
+      {url && <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />}
       <button type="button" onClick={onRemove}
         className="absolute right-1 top-1 rounded-full bg-background/90 p-1 text-foreground hover:bg-destructive hover:text-destructive-foreground">
         <X className="h-3 w-3" />

@@ -1,3 +1,4 @@
+import imageCompression from "browser-image-compression";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -132,7 +133,7 @@ function EntList({ type }: { type: EntertainmentType }) {
       <div className="mb-6 flex items-center gap-2">
         {pendingCover && (
           <div className="h-12 w-9 shrink-0 overflow-hidden rounded-md bg-muted">
-            <img src={pendingCover} alt="" className="h-full w-full object-cover" />
+            <img src={pendingCover} alt="" loading="lazy" className="h-full w-full object-cover" />
           </div>
         )}
         <CoverSearchInput
@@ -199,7 +200,7 @@ function EntCard({
   type: EntertainmentType;
   onOpen: () => void;
 }) {
-  const url = useSignedUrl(item.cover_url);
+  const url = useSignedUrl(item.cover_url, 400);
   const Icon = TYPE_ICON[type];
   const myReview = item.entertainment_reviews?.find((r) => r.user_id);
   const avg = item.entertainment_reviews?.length
@@ -216,6 +217,7 @@ function EntCard({
           <img
             src={url}
             alt={item.title}
+            loading="lazy"
             className="h-full w-full object-cover transition group-hover:scale-105"
           />
         ) : (
@@ -353,9 +355,14 @@ function EntDetailDialog({
     if (!file || !coupleId || !item) return;
     setUploading(true);
     try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      });
       const ext = file.name.split(".").pop();
       const path = `couples/${coupleId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("photos").upload(path, file, { upsert: false });
+      const { error } = await supabase.storage.from("photos").upload(path, compressed, { upsert: false });
       if (error) throw error;
       if (item.cover_url) {
         void supabase.storage.from("photos").remove([item.cover_url]);
@@ -409,7 +416,7 @@ function EntDetailDialog({
     onOpenChange(false);
   };
 
-  const coverUrl = useSignedUrl(item?.cover_url ?? null);
+  const coverUrl = useSignedUrl(item?.cover_url ?? null, 800);
   const Icon = TYPE_ICON[type];
 
   return (
@@ -424,7 +431,7 @@ function EntDetailDialog({
             <div className="flex gap-4">
               <div className="relative aspect-[2/3] w-32 shrink-0 overflow-hidden rounded-2xl bg-muted">
                 {coverUrl ? (
-                  <img src={coverUrl} alt="" className="h-full w-full object-cover" />
+                  <img src={coverUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-muted-foreground/40">
                     <Icon className="h-8 w-8" />

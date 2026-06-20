@@ -1,3 +1,4 @@
+import imageCompression from "browser-image-compression";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -149,9 +150,14 @@ function PlaceDetailPage() {
     if (!file || !coupleId || !place) return;
     setUploading(true);
     try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      });
       const ext = file.name.split(".").pop();
       const path = `couples/${coupleId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("photos").upload(path, file, { upsert: false });
+      const { error } = await supabase.storage.from("photos").upload(path, compressed, { upsert: false });
       if (error) throw error;
       await supabase
         .from("places")
@@ -350,10 +356,10 @@ function PlaceDetailPage() {
 }
 
 function Photo({ path, onRemove }: { path: string; onRemove: () => void }) {
-  const url = useSignedUrl(path);
+  const url = useSignedUrl(path, 800);
   return (
     <div className="group relative aspect-square overflow-hidden rounded-2xl bg-muted">
-      {url && <img src={url} alt="" className="h-full w-full object-cover" />}
+      {url && <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />}
       <button
         type="button"
         onClick={onRemove}

@@ -183,7 +183,7 @@ function PlaceCover({ path }: { path: string | null }) {
   const url = useSignedUrl(path);
   return (
     <div className="aspect-square w-full bg-muted">
-      {url && <img src={url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />}
+      {url && <img src={url} alt="" loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />}
     </div>
   );
 }

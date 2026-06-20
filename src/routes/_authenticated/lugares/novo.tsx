@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import imageCompression from "browser-image-compression";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -42,9 +43,14 @@ function NovoLugarPage() {
     if (!file || !coupleId) return;
     setUploading(true);
     try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      });
       const ext = file.name.split(".").pop();
       const path = `couples/${coupleId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("photos").upload(path, file, { upsert: false });
+      const { error } = await supabase.storage.from("photos").upload(path, compressed, { upsert: false });
       if (error) throw error;
       setPhotos((p) => [...p, path]);
     } catch (err) {
@@ -199,10 +205,10 @@ function NovoLugarPage() {
 }
 
 function PhotoThumb({ path, onRemove }: { path: string; onRemove: () => void }) {
-  const url = useSignedUrl(path);
+  const url = useSignedUrl(path, 400);
   return (
     <div className="relative h-20 w-20 overflow-hidden rounded-xl bg-muted">
-      {url && <img src={url} alt="" className="h-full w-full object-cover" />}
+      {url && <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />}
       <button
         type="button"
         onClick={onRemove}

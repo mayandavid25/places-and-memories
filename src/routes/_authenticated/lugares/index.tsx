@@ -157,7 +157,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 }
 
 function PlaceCard({ place }: { place: PlaceRow & { avg: number } }) {
-  const url = useSignedUrl(place.photos?.[0] ?? null);
+  const url = useSignedUrl(place.photos?.[0] ?? null, 400);
   return (
     <Link
       to="/lugares/$id"
@@ -165,7 +165,7 @@ function PlaceCard({ place }: { place: PlaceRow & { avg: number } }) {
       className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-lg"
     >
       <div className="relative aspect-[3/4] w-full bg-muted">
-        {url && <img src={url} alt={place.name} className="h-full w-full object-cover transition group-hover:scale-105" />}
+        {url && <img src={url} alt={place.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />}
         {place.favorited && (
           <span className="absolute right-2 top-2 rounded-full bg-background/90 p-1.5">
             <Heart className="h-3 w-3 fill-primary text-primary" />

@@ -1,3 +1,4 @@
+import imageCompression from "browser-image-compression";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -176,7 +177,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 
 function RecipeCard({ recipe, onOpen }: { recipe: RecipeRow; onOpen: () => void }) {
   const cover = recipe.cover_url ?? recipe.photos?.[0] ?? null;
-  const url = useSignedUrl(cover);
+  const url = useSignedUrl(cover, 400);
   return (
     <button
       onClick={onOpen}
@@ -184,7 +185,7 @@ function RecipeCard({ recipe, onOpen }: { recipe: RecipeRow; onOpen: () => void 
     >
       <div className="relative aspect-[3/4] w-full bg-muted">
         {url ? (
-          <img src={url} alt={recipe.name} className="h-full w-full object-cover transition group-hover:scale-105" />
+          <img src={url} alt={recipe.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted-foreground/50">
             <ChefHat className="h-8 w-8" />
@@ -365,9 +366,14 @@ function RecipeDetailDialog({
     if (!file || !coupleId || !recipe) return;
     setUploading(true);
     try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      });
       const ext = file.name.split(".").pop();
       const path = `couples/${coupleId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("photos").upload(path, file, { upsert: false });
+      const { error } = await supabase.storage.from("photos").upload(path, compressed, { upsert: false });
       if (error) throw error;
       const newPhotos = [...(recipe.photos ?? []), path];
       const update: { photos: string[]; cover_url?: string } = { photos: newPhotos };
@@ -728,11 +734,11 @@ function RecipeDetailDialog({
 }
 
 function CoverDisplay({ path }: { path: string | null }) {
-  const url = useSignedUrl(path);
+  const url = useSignedUrl(path, 800);
   return (
     <div className="aspect-[16/9] w-full overflow-hidden rounded-2xl bg-muted">
       {url ? (
-        <img src={url} alt="" className="h-full w-full object-cover" />
+        <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-muted-foreground/40">
           <ChefHat className="h-10 w-10" />
@@ -753,7 +759,7 @@ function PhotoThumb({
   onSetCover: () => void;
   onRemove: () => void;
 }) {
-  const url = useSignedUrl(path);
+  const url = useSignedUrl(path, 400);
   return (
     <div
       className={cn(
@@ -763,7 +769,7 @@ function PhotoThumb({
     >
       {url && (
         <button type="button" onClick={onSetCover} className="block h-full w-full">
-          <img src={url} alt="" className="h-full w-full object-cover" />
+          <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
         </button>
       )}
       <button

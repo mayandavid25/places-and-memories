@@ -1,3 +1,4 @@
+import imageCompression from "browser-image-compression";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -134,14 +135,23 @@ function PerfilPage() {
   const onAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user || !profile?.couple_id) return;
-    const ext = file.name.split(".").pop();
-    const path = `couples/${profile.couple_id}/avatars/${user.id}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("photos").upload(path, file, { upsert: true });
-    if (error) return toast.error(error.message);
-    await supabase.from("profiles").update({ avatar_url: path }).eq("id", user.id);
-    await refreshProfile();
-    qc.invalidateQueries();
-    toast.success("Foto atualizada");
+    try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 800,
+        useWebWorker: true,
+      });
+      const ext = file.name.split(".").pop();
+      const path = `couples/${profile.couple_id}/avatars/${user.id}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("photos").upload(path, compressed, { upsert: true });
+      if (error) return toast.error(error.message);
+      await supabase.from("profiles").update({ avatar_url: path }).eq("id", user.id);
+      await refreshProfile();
+      qc.invalidateQueries();
+      toast.success("Foto atualizada");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro no upload");
+    }
   };
 
   const handleLogout = async () => {
