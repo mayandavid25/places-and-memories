@@ -23,15 +23,9 @@ export function ScoreInput({
   );
 }
 
-  return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">Nota</span>
-        <span className="text-2xl font-bold text-primary leading-none">
-          {value % 1 === 0 ? value.toFixed(0) : value.toFixed(1)}
-          <span className="ml-0.5 text-sm text-muted-foreground font-normal">/10</span>
-        </span>
-      </div>
+return (
+  <div className={cn("flex items-center gap-3", className)}>
+    <div className="relative flex w-full items-center">
       <input
         type="range"
         min={1}
@@ -39,13 +33,16 @@ export function ScoreInput({
         step={0.5}
         value={value}
         onChange={(e) => onChange?.(parseFloat(e.target.value))}
-        className="w-full accent-primary cursor-pointer"
+        className="relative z-0 w-full accent-primary cursor-pointer"
       />
-      <div className="flex justify-between text-[10px] text-muted-foreground">
-        <span>1</span>
-        <span>5</span>
-        <span>10</span>
-      </div>
+      <span
+        className="pointer-events-none absolute top-1/2 z-20 h-3 w-[2px] -translate-x-1/2 -translate-y-1/2 bg-foreground/60"
+        style={{ left: "50%" }}
+      />
     </div>
-  );
+    <span className="w-10 shrink-0 text-right text-base font-bold text-primary leading-none">
+      {value % 1 === 0 ? value.toFixed(0) : value.toFixed(1)}
+    </span>
+  </div>
+);
 }

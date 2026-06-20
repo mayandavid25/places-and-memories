@@ -20,7 +20,7 @@ export function useSignedUrl(path: string | null | undefined, width?: number, ex
       return;
     }
     const options = width
-      ? { transform: { width, quality: 75 } }
+      ? { transform: { width, quality: 75, resize: "contain" as const } }
       : undefined;
     void supabase.storage.from("photos").createSignedUrl(path, expiresIn, options).then(({ data }) => {
       if (!active || !data?.signedUrl) return;
