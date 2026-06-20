@@ -401,14 +401,26 @@ function RecipeDetailDialog({
   };
 
   const [newIng, setNewIng] = useState("");
+  const [showPasteList, setShowPasteList] = useState(false);
+  const [pasteList, setPasteList] = useState("");
   const addIngredient = async () => {
     if (!newIng.trim()) return;
     const position = (ingredients?.length ?? 0) + 1;
-    await supabase
+    const { error } = await supabase
       .from("recipe_ingredients")
       .insert({ recipe_id: id, text: newIng.trim(), position });
+    if (error) { toast.error("Erro ao adicionar ingrediente: " + error.message); return; }
     setNewIng("");
-    qc.invalidateQueries({ queryKey: ["recipe-ingredients", id] });
+    await qc.refetchQueries({ queryKey: ["recipe-ingredients", id] });
+  };
+  const addIngredients = async (lines: string[]) => {
+    const items = lines.map((l) => l.trim()).filter(Boolean);
+    if (!items.length) return;
+    const base = ingredients?.length ?? 0;
+    const rows = items.map((text, i) => ({ recipe_id: id, text, position: base + i + 1 }));
+    const { error } = await supabase.from("recipe_ingredients").insert(rows);
+    if (error) { toast.error("Erro ao adicionar ingredientes: " + error.message); return; }
+    await qc.refetchQueries({ queryKey: ["recipe-ingredients", id] });
   };
   const toggleIng = async (ingId: string, checked: boolean) => {
     await supabase.from("recipe_ingredients").update({ checked: !checked }).eq("id", ingId);
@@ -422,10 +434,15 @@ function RecipeDetailDialog({
   const [newComment, setNewComment] = useState("");
   const addComment = async () => {
     if (!newComment.trim() || !user) return;
-    await supabase
+    const { error } = await supabase
       .from("recipe_comments")
       .insert({ recipe_id: id, user_id: user.id, comment: newComment.trim() });
+    if (error) {
+      toast.error("Erro ao salvar comentário: " + error.message);
+      return;
+    }
     setNewComment("");
+    await qc.refetchQueries({ queryKey: ["recipe-comments", id] });
     qc.invalidateQueries({ queryKey: ["recipe-comments", id] });
   };
   const removeComment = async (cid: string) => {
@@ -511,16 +528,6 @@ function RecipeDetailDialog({
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <Label>Descrição</Label>
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                  placeholder="Modo de preparo, observações…"
-                  className="rounded-xl"
-                />
-              </div>
             </div>
 
             <div>
@@ -582,13 +589,69 @@ function RecipeDetailDialog({
                       void addIngredient();
                     }
                   }}
+                  onPaste={(e) => {
+                    const text = e.clipboardData.getData("text");
+                    if (text.includes("\n")) {
+                      e.preventDefault();
+                      void addIngredients(text.split("\n"));
+                      setNewIng("");
+                    }
+                  }}
                   placeholder="Adicionar ingrediente"
                   className="h-10 rounded-xl"
                 />
                 <Button onClick={addIngredient} className="rounded-xl" disabled={!newIng.trim()}>
                   <Plus className="h-4 w-4" />
                 </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPasteList(true)}
+                  className="rounded-xl whitespace-nowrap text-xs"
+                >
+                  Colar lista
+                </Button>
               </div>
+              {showPasteList && (
+                <div className="mt-3 space-y-2 rounded-xl border border-border bg-muted/40 p-3">
+                  <p className="text-xs text-muted-foreground">Cole vários ingredientes, um por linha:</p>
+                  <textarea
+                    autoFocus
+                    value={pasteList}
+                    onChange={(e) => setPasteList(e.target.value)}
+                    rows={5}
+                    placeholder={"2 xícaras de farinha\n1 colher de sal\n3 ovos"}
+                    className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <Button variant="ghost" size="sm" onClick={() => { setShowPasteList(false); setPasteList(""); }} className="rounded-xl">
+                      Cancelar
+                    </Button>
+                    <Button size="sm" onClick={async () => {
+                      await addIngredients(pasteList.split("\n"));
+                      setPasteList("");
+                      setShowPasteList(false);
+                    }} disabled={!pasteList.trim()} className="rounded-xl">
+                      Adicionar todos
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <h3 className="mb-2 font-serif text-lg">Passo a passo</h3>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                onInput={(e) => {
+                  const el = e.currentTarget;
+                  el.style.height = "auto";
+                  el.style.height = el.scrollHeight + "px";
+                }}
+                placeholder="Modo de preparo, observações…"
+                className="w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none overflow-hidden"
+                style={{ minHeight: "120px" }}
+              />
             </div>
 
             <div>
