@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { StarRating } from "@/components/star-rating";
+import { ScoreInput } from "@/components/score-input";
 import { PlaceAutocomplete } from "@/components/place-autocomplete";
 import { toast } from "sonner";
 import { CATEGORIES, CATEGORY_LABEL, type PlaceCategory } from "@/lib/categories";
@@ -177,7 +177,7 @@ function NovoLugarPage() {
 
         <div className="space-y-1.5">
           <Label>Sua avaliação (opcional)</Label>
-          <StarRating value={rating} onChange={setRating} size={22} />
+          <ScoreInput value={rating} onChange={setRating} />
         </div>
 
         <div className="space-y-1.5">
@@ -186,7 +186,7 @@ function NovoLugarPage() {
         </div>
 
         <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={() => navigate({ to: "/lugares" })} className="flex-1 rounded-xl">
+          <Button type="button" variant="outline" onClick={() => navigate({ to: "/lugares", search: { tab: "visitados" } })} className="flex-1 rounded-xl">
             Cancelar
           </Button>
           <Button type="submit" disabled={busy || !name} className="flex-1 rounded-xl">
