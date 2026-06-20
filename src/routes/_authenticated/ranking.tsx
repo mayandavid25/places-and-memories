@@ -47,7 +47,6 @@ function RankingPage() {
                     <span className="font-serif text-lg italic text-primary">{idx + 1}</span>
                     <p className="flex-1 truncate text-sm">{p.name}</p>
                     <ScoreInput value={p.avg} readOnly />
-                    <span className="text-xs text-muted-foreground">{p.avg.toFixed(1)}</span>
                   </Link>
                 ))}
                 {list.length === 0 && <p className="text-sm text-muted-foreground">Avalie lugares para ver o ranking.</p>}

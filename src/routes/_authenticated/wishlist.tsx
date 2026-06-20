@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Trash2, Upload, X, MapPin, Calendar as CalendarIcon, Lock, Star } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { StarRating } from "@/components/star-rating";
+import { ScoreInput } from "@/components/score-input";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -212,7 +212,7 @@ return (
             <p className="text-sm text-muted-foreground">Deixa uma avaliação do lugar — é opcional!</p>
             <div>
               <Label className="mb-2 block text-sm">Nota</Label>
-              <StarRating value={reviewRating} onChange={setReviewRating} size={28} />
+              <ScoreInput value={reviewRating} onChange={setReviewRating} />
             </div>
             <div>
               <Label className="mb-2 block text-sm">Comentário</Label>
