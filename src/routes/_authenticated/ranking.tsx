@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { PageHeader, PageShell } from "@/components/page-shell";
-import { StarRating } from "@/components/star-rating";
+import { ScoreInput } from "@/components/score-input";
 import { CATEGORIES, CATEGORY_LABEL_PLURAL, type PlaceCategory } from "@/lib/categories";
 
 export const Route = createFileRoute("/_authenticated/ranking")({ component: RankingPage });
@@ -46,7 +46,7 @@ function RankingPage() {
                   <Link key={p.id} to="/lugares/$id" params={{ id: p.id }} className="flex items-center gap-4 rounded-xl px-2 py-2 transition hover:bg-muted/50">
                     <span className="font-serif text-lg italic text-primary">{idx + 1}</span>
                     <p className="flex-1 truncate text-sm">{p.name}</p>
-                    <StarRating value={p.avg} readOnly size={12} />
+                    <ScoreInput value={p.avg} readOnly />
                     <span className="text-xs text-muted-foreground">{p.avg.toFixed(1)}</span>
                   </Link>
                 ))}

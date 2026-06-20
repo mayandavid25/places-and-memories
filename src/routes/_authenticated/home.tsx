@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { PageShell } from "@/components/page-shell";
-import { StarRating } from "@/components/star-rating";
+import { ScoreInput } from "@/components/score-input";
 import { UserAvatar } from "@/components/user-avatar";
 import { useSignedUrl } from "@/hooks/use-signed-url";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -233,7 +233,7 @@ function TopList({ coupleId, limit = 3 }: { coupleId: string | null | undefined;
             <p className="truncate text-sm font-medium">{p.name}</p>
             <p className="text-xs capitalize text-muted-foreground">{p.category}</p>
           </div>
-          <StarRating value={p.avg} readOnly size={12} />
+          <ScoreInput value={p.avg} readOnly />
         </Link>
       ))}
       {data && data.length === 0 && <EmptyHint text="Avalie lugares para ver o ranking" />}
