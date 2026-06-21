@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CoverSearchInput } from "@/components/cover-search-input";
+import { PlaceAutocomplete } from "@/components/place-autocomplete";
+import { MapsActions } from "@/components/maps-actions";
 
 export const Route = createFileRoute("/_authenticated/entretenimento")({
   component: EntertainmentPage,
@@ -76,6 +78,9 @@ type EntItem = {
   progress_total: number | null;
   progress_unit: string | null;
   progress_note: string | null;
+  planned_date: string | null;
+  planned_time: string | null;
+  planned_location: string | null;
   entertainment_reviews: { rating: number; user_id: string; comment: string | null }[];
 };
 
@@ -267,10 +272,10 @@ function EntDetailDialog({
       const { data, error } = await supabase
         .from("entertainment_items")
         .select(
-          "id, title, cover_url, status, description, progress_current, progress_total, progress_unit, progress_note",
+          "id, title, cover_url, status, description, progress_current, progress_total, progress_unit, progress_note, planned_date, planned_time, planned_location",
         )
         .eq("id", id)
-        .single();
+        .single() as any;
       if (error) throw error;
       return data;
     },
@@ -301,7 +306,29 @@ function EntDetailDialog({
   const [progressCurrent, setProgressCurrent] = useState<string>("");
   const [progressTotal, setProgressTotal] = useState<string>("");
   const [progressNote, setProgressNote] = useState("");
+  const [plannedDate, setPlannedDate] = useState("");
+  const [plannedTime, setPlannedTime] = useState("");
+  const [plannedLocation, setPlannedLocation] = useState("");
+  const [plannedCoords, setPlannedCoords] = useState<{
+    lat: number | null;
+    lng: number | null;
+    formatted_address: string | null;
+  }>({ lat: null, lng: null, formatted_address: null });
   const progressUnitLabel = ENT_PROGRESS_UNIT_BY_TYPE[type];
+
+  const { data: linkedEvent } = useQuery({
+    queryKey: ["ent-event", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("events")
+        .select("id, date, title")
+        .eq("source_type" as any, "entertainment")
+        .eq("source_id" as any, id)
+        .limit(1)
+        .maybeSingle();
+      return (data ?? null) as { id: string; date: string; title: string } | null;
+    },
+  });
 
   useEffect(() => {
     if (item) {
@@ -311,6 +338,14 @@ function EntDetailDialog({
       setProgressCurrent(item.progress_current?.toString() ?? "");
       setProgressTotal(item.progress_total?.toString() ?? "");
       setProgressNote(item.progress_note ?? "");
+      setPlannedDate((item as any).planned_date ?? "");
+      setPlannedTime((item as any).planned_time ?? "");
+      setPlannedLocation((item as any).planned_location ?? "");
+      setPlannedCoords({
+        lat: (item as any).planned_lat ?? null,
+        lng: (item as any).planned_lng ?? null,
+        formatted_address: (item as any).planned_formatted_address ?? null,
+      });
     }
   }, [item?.id, item?.title, item?.description, item?.status, item?.progress_current, item?.progress_total, item?.progress_note]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -323,7 +358,10 @@ function EntDetailDialog({
       status === item.status &&
       progressCurrent === (item.progress_current?.toString() ?? "") &&
       progressTotal === (item.progress_total?.toString() ?? "") &&
-      progressNote === (item.progress_note ?? "")
+      progressNote === (item.progress_note ?? "") &&
+      plannedDate === ((item as any).planned_date ?? "") &&
+      plannedTime === ((item as any).planned_time ?? "") &&
+      plannedLocation === ((item as any).planned_location ?? "")
     )
       return;
     if (debouncedRef.current) clearTimeout(debouncedRef.current);
@@ -338,16 +376,66 @@ function EntDetailDialog({
           progress_total: progressTotal ? Number(progressTotal) : null,
           progress_unit: progressUnitLabel.unit,
           progress_note: progressNote || null,
+          planned_date: (plannedDate || null) as never,
+          planned_time: (plannedTime || null) as never,
+          planned_location: (plannedLocation || null) as never,
+          planned_lat: (plannedCoords.lat ?? null) as never,
+          planned_lng: (plannedCoords.lng ?? null) as never,
+          planned_formatted_address: (plannedCoords.formatted_address || null) as never,
           updated_at: new Date().toISOString(),
         })
         .eq("id", id);
+
+      // Sincroniza evento vinculado
+      const { data: existingEvents } = await supabase
+        .from("events")
+        .select("id")
+        .eq("source_type" as any, "entertainment")
+        .eq("source_id" as any, id)
+        .limit(1);
+      const existingEvent = existingEvents?.[0] ?? null;
+
+      if (plannedDate) {
+        if (existingEvent) {
+          await supabase
+            .from("events")
+            .update({
+              date: plannedDate,
+              time: plannedTime || null,
+              location: plannedCoords.formatted_address || plannedLocation || null,
+              formatted_address: plannedCoords.formatted_address || null,
+              lat: plannedCoords.lat,
+              lng: plannedCoords.lng,
+              })
+            .eq("id", existingEvent.id);
+        } else {
+          await supabase.from("events").insert({
+            couple_id: coupleId,
+            created_by: user?.id,
+            title,
+            date: plannedDate,
+            time: plannedTime || null,
+            location: plannedCoords.formatted_address || plannedLocation || null,
+            formatted_address: plannedCoords.formatted_address || null,
+            lat: plannedCoords.lat,
+            lng: plannedCoords.lng,
+            source_type: "entertainment",
+            source_id: id,
+          } as never);
+        }
+      } else if (existingEvent) {
+        await supabase.from("events").delete().eq("id", existingEvent.id);
+      }
+
       qc.invalidateQueries({ queryKey: ["ent-item", id] });
       qc.invalidateQueries({ queryKey: ["ent"] });
+      qc.invalidateQueries({ queryKey: ["events"] });
+      qc.invalidateQueries({ queryKey: ["ent-event", id] });
     }, 700);
     return () => {
       if (debouncedRef.current) clearTimeout(debouncedRef.current);
     };
-  }, [title, description, status, progressCurrent, progressTotal, progressNote, item, id, qc, progressUnitLabel.unit]);
+  }, [title, description, status, progressCurrent, progressTotal, progressNote, plannedDate, plannedTime, plannedLocation, item, id, qc, progressUnitLabel.unit]);
 
   const [uploading, setUploading] = useState(false);
   const onCover = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -477,6 +565,68 @@ function EntDetailDialog({
             <div className="space-y-1.5">
               <Label>Descrição</Label>
               <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="Sinopse, observações…" className="rounded-xl" />
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card/60 p-4 space-y-3">
+              <h4 className="font-serif text-base italic">Quando assistir</h4>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>Data</Label>
+                  <Input
+                    type="date"
+                    value={plannedDate}
+                    onChange={(e) => setPlannedDate(e.target.value)}
+                    className="h-11 rounded-xl"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Hora (opcional)</Label>
+                  <Input
+                    type="text"
+                    value={plannedTime}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/[^\d:]/g, "");
+                      if (v.length === 2 && !v.includes(":") && plannedTime.length === 1) {
+                        setPlannedTime(v + ":");
+                      } else if (v.length <= 5) {
+                        setPlannedTime(v);
+                      }
+                    }}
+                    placeholder="HH:MM"
+                    maxLength={5}
+                    className="h-11 rounded-xl"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Local (opcional — ex.: Cinema City)</Label>
+                <PlaceAutocomplete
+                  value={plannedLocation}
+                  onChange={(v) => {
+                    setPlannedLocation(v);
+                    setPlannedCoords({ lat: null, lng: null, formatted_address: null });
+                  }}
+                  onSelect={(s) => setPlannedCoords(s)}
+                  placeholder="Deixe vazio para noite em casa"
+                  className="h-11 rounded-xl"
+                />
+                {(plannedCoords.formatted_address || plannedLocation) && (
+                  <div className="pt-1">
+                    <MapsActions
+                      query={plannedCoords.formatted_address ?? plannedLocation}
+                      lat={plannedCoords.lat}
+                      lng={plannedCoords.lng}
+                      size="md"
+                    />
+                  </div>
+                )}
+              </div>
+              {linkedEvent && (
+                <p className="text-xs text-muted-foreground">
+                  📅 No calendário em{" "}
+                  {format(new Date(linkedEvent.date + "T00:00"), "d 'de' MMMM", { locale: ptBR })}
+                </p>
+              )}
             </div>
 
             {status === "consumindo" && (

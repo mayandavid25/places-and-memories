@@ -51,6 +51,12 @@ const SORT_LABEL: Record<SortOption, string> = {
   za: "Z-A",
 };
 
+type LinkedEvent = {
+  id: string;
+  date: string;
+  title: string;
+};
+
 function ReceitasPage() {
   const { user, profile } = useAuth();
   const qc = useQueryClient();
@@ -361,6 +367,20 @@ function RecipeDetailDialog({
     },
   });
 
+  const { data: linkedEvent } = useQuery({
+    queryKey: ["recipe-event", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("events")
+        .select("id, date, title")
+        .eq("source_type" as any, "recipe")
+        .eq("source_id" as any, id)
+        .limit(1)
+        .maybeSingle();
+      return (data ?? null) as LinkedEvent | null;
+    },
+  });
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<RecipeCategory | "">("");
@@ -397,8 +417,43 @@ function RecipeDetailDialog({
           updated_at: new Date().toISOString(),
         })
         .eq("id", id);
+
+      // Sincroniza evento vinculado
+      const { data: existingEvents } = await supabase
+        .from("events")
+        .select("id")
+        .eq("source_type" as any, "recipe")
+        .eq("source_id" as any, id)
+        .limit(1);
+      const existingEvent = existingEvents?.[0] ?? null;
+
+      if (plannedDate) {
+        if (existingEvent) {
+          // Atualiza data do evento existente
+          await supabase
+            .from("events")
+            .update({ date: plannedDate })
+            .eq("id", existingEvent.id);
+        } else {
+          // Cria evento novo vinculado à receita
+          await supabase.from("events").insert({
+            couple_id: coupleId,
+            created_by: user?.id,
+            title: name,
+            date: plannedDate,
+            source_type: "recipe",
+            source_id: id,
+          } as never);
+        }
+      } else if (existingEvent) {
+        // Data foi apagada → remove o evento
+        await supabase.from("events").delete().eq("id", existingEvent.id);
+      }
+
       qc.invalidateQueries({ queryKey: ["recipe", id] });
       qc.invalidateQueries({ queryKey: ["recipes"] });
+      qc.invalidateQueries({ queryKey: ["events"] });
+      qc.invalidateQueries({ queryKey: ["recipe-event", id] });
     }, 700);
     return () => {
       if (saveDebounced.current) clearTimeout(saveDebounced.current);
@@ -563,6 +618,12 @@ function RecipeDetailDialog({
                     onChange={(e) => setPlannedDate(e.target.value)}
                     className="h-11 rounded-xl"
                   />
+                  {linkedEvent && (
+                    <p className="text-xs text-muted-foreground">
+                      📅 No calendário em{" "}
+                      {format(new Date(linkedEvent.date + "T00:00"), "d 'de' MMMM", { locale: ptBR })}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <Label>Categoria</Label>

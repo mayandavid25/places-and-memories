@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Trash2, Copy, Upload, X, Tag } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -49,6 +49,15 @@ type EventRow = {
   participants: string[];
 };
 
+type WizardType = "place" | "recipe" | "entertainment" | "generic";
+
+const WIZARD_TYPES: { type: WizardType; label: string }[] = [
+  { type: "place", label: "Lugar" },
+  { type: "recipe", label: "Receita" },
+  { type: "entertainment", label: "Filme / Série" },
+  { type: "generic", label: "Evento" },
+];
+
 const CATEGORIES = ["casal", "família", "amigos", "viagem", "aniversário", "trabalho", "especial"];
 
 function CalendarPage() {
@@ -63,9 +72,9 @@ function CalendarPage() {
 
   const { new: isNew } = useSearch({ from: "/_authenticated/calendario" });
 
-useEffect(() => {
-  if (isNew) setOpenNew(true);
-}, [isNew]);
+  useEffect(() => {
+    if (isNew) setOpenNew(true);
+  }, [isNew]);
 
   const { data: events } = useQuery({
     queryKey: ["events", coupleId],
@@ -82,7 +91,6 @@ useEffect(() => {
   });
 
   const eventsByDay = (d: Date) => (events ?? []).filter((e) => isSameDay(new Date(e.date + "T00:00"), d));
-
   const upcoming = (events ?? []).filter((e) => new Date(e.date + "T00:00") >= new Date(new Date().toDateString())).slice(0, 5);
 
   return (
@@ -91,21 +99,9 @@ useEffect(() => {
         title="Calendário"
         subtitle="Nossos rolês, viagens e datas especiais."
         action={
-          <Dialog open={openNew} onOpenChange={setOpenNew}>
-            <DialogTrigger asChild>
-              <Button className="hidden md:flex rounded-full"><Plus className="mr-1 h-4 w-4" /> Evento</Button>
-            </DialogTrigger>
-            <EventFormDialog
-              key={openNew ? "new-open" : "new-closed"}
-              mode="create"
-              userId={user?.id}
-              coupleId={coupleId}
-              onSaved={() => {
-                setOpenNew(false);
-                qc.invalidateQueries({ queryKey: ["events"] });
-              }}
-            />
-          </Dialog>
+          <Button onClick={() => setOpenNew(true)} className="hidden md:flex rounded-full">
+            <Plus className="mr-1 h-4 w-4" /> Evento
+          </Button>
         }
       />
 
@@ -115,19 +111,15 @@ useEffect(() => {
           <h2 className="font-serif text-xl capitalize">{format(month, "MMMM yyyy", { locale: ptBR })}</h2>
           <button onClick={() => setMonth(addMonths(month, 1))} className="text-sm text-muted-foreground hover:text-primary">→</button>
         </div>
-        {/* Cabeçalho dias da semana */}
         <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground">
-          {/* Mobile: iniciais únicas */}
           <div className="contents md:hidden">
             {["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => <div key={i} className="py-1">{d}</div>)}
           </div>
-          {/* Desktop: nomes abreviados */}
           <div className="contents max-md:hidden">
             {["dom", "seg", "ter", "qua", "qui", "sex", "sáb"].map((d) => <div key={d} className="py-1">{d}</div>)}
           </div>
         </div>
 
-        {/* Mobile: squircle + ponto + clique para abrir eventos do dia */}
         <div className="mt-1 grid grid-cols-7 gap-1 md:hidden">
           {days.map((d) => {
             const es = eventsByDay(d);
@@ -148,15 +140,12 @@ useEffect(() => {
                 )}
               >
                 <span className="leading-none">{format(d, "d")}</span>
-                {hasEvent && (
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
-                )}
+                {hasEvent && <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />}
               </button>
             );
           })}
         </div>
 
-        {/* Desktop: layout original com títulos inline */}
         <div className="mt-1 hidden grid-cols-7 gap-1 md:grid">
           {days.map((d) => {
             const es = eventsByDay(d);
@@ -245,6 +234,20 @@ useEffect(() => {
         </div>
       </section>
 
+      <NewEventWizard
+        open={openNew}
+        onOpenChange={setOpenNew}
+        userId={user?.id}
+        coupleId={coupleId}
+        onSaved={() => {
+          setOpenNew(false);
+          qc.invalidateQueries({ queryKey: ["events"] });
+          qc.invalidateQueries({ queryKey: ["recipes"] });
+          qc.invalidateQueries({ queryKey: ["ent"] });
+          qc.invalidateQueries({ queryKey: ["places"] });
+        }}
+      />
+
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         {editing && (
           <EventFormDialog
@@ -261,6 +264,270 @@ useEffect(() => {
         )}
       </Dialog>
     </PageShell>
+  );
+}
+
+function NewEventWizard({
+  open,
+  onOpenChange,
+  userId,
+  coupleId,
+  onSaved,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  userId: string | undefined;
+  coupleId: string | undefined | null;
+  onSaved: () => void;
+}) {
+  const [type, setType] = useState<WizardType>("place");
+  const [name, setName] = useState("");
+  const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [time, setTime] = useState("");
+  const [location, setLocation] = useState("");
+  const [coords, setCoords] = useState<{ lat: number | null; lng: number | null; formatted_address: string | null }>({ lat: null, lng: null, formatted_address: null });
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setType("place");
+      setName("");
+      setDate(format(new Date(), "yyyy-MM-dd"));
+      setTime("");
+      setLocation("");
+      setCoords({ lat: null, lng: null, formatted_address: null });
+    }
+  }, [open]);
+
+  const save = async () => {
+    if (!name || !coupleId || !userId) return;
+    setBusy(true);
+    try {
+      if (type === "place") {
+        const { data: place, error } = await supabase
+          .from("places")
+          .insert({
+            couple_id: coupleId,
+            created_by: userId,
+            name,
+            category: "diversao",
+            location: location || null,
+            formatted_address: coords.formatted_address,
+            lat: coords.lat,
+            lng: coords.lng,
+            visited_at: date || null,
+          })
+          .select("id")
+          .single();
+        if (error) throw error;
+        if (date) {
+          await supabase.from("events").insert({
+            couple_id: coupleId,
+            created_by: userId,
+            title: name,
+            date,
+            location: coords.formatted_address || location || null,
+            formatted_address: coords.formatted_address,
+            lat: coords.lat,
+            lng: coords.lng,
+            place_id: place.id,
+            source_type: "place",
+            source_id: place.id,
+          } as never);
+        }
+        toast.success("Lugar criado!");
+      } else if (type === "recipe") {
+        const { data: recipe, error } = await supabase
+          .from("recipes")
+          .insert({
+            couple_id: coupleId,
+            created_by: userId,
+            name,
+            planned_date: date || null,
+          })
+          .select("id")
+          .single();
+        if (error) throw error;
+        if (date) {
+          await supabase.from("events").insert({
+            couple_id: coupleId,
+            created_by: userId,
+            title: name,
+            date,
+            source_type: "recipe",
+            source_id: recipe.id,
+          } as never);
+        }
+        toast.success("Receita criada!");
+      } else if (type === "entertainment") {
+        const { data: ent, error } = await supabase
+          .from("entertainment_items")
+          .insert({
+            couple_id: coupleId,
+            created_by: userId,
+            type: "filme",
+            title: name,
+            planned_date: (date || null) as never,
+            planned_time: (time || null) as never,
+            planned_location: (location || null) as never,
+            planned_lat: (coords.lat ?? null) as never,
+            planned_lng: (coords.lng ?? null) as never,
+            planned_formatted_address: (coords.formatted_address || null) as never,
+          })
+          .select("id")
+          .single();
+        if (error) throw error;
+        if (date) {
+          await supabase.from("events").insert({
+            couple_id: coupleId,
+            created_by: userId,
+            title: name,
+            date,
+            time: time || null,
+            location: coords.formatted_address || location || null,
+            formatted_address: coords.formatted_address,
+            lat: coords.lat,
+            lng: coords.lng,
+            source_type: "entertainment",
+            source_id: ent.id,
+          } as never);
+        }
+        toast.success("Adicionado!");
+      } else {
+        // generic
+        const { error } = await supabase.from("events").insert({
+          couple_id: coupleId,
+          created_by: userId,
+          title: name,
+          date,
+          time: time || null,
+          location: coords.formatted_address || location || null,
+          formatted_address: coords.formatted_address,
+          lat: coords.lat,
+          lng: coords.lng,
+        } as never);
+        if (error) throw error;
+        toast.success("Evento criado!");
+      }
+      onSaved();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao salvar");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const showLocation = type === "place" || type === "entertainment" || type === "generic";
+  const showTime = type === "entertainment" || type === "generic";
+  const locationLabel = type === "place" ? "Localização" : type === "entertainment" ? "Local (opcional — ex.: Cinema City)" : "Local";
+  const locationPlaceholder = type === "entertainment" ? "Deixe vazio para noite em casa" : "Buscar endereço...";
+  const nameLabel = type === "entertainment" ? "Título" : type === "recipe" ? "Nome da receita" : type === "place" ? "Nome do lugar" : "Título";
+  const dateLabelText = type === "place" ? "Data da visita" : "Data";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Novo evento</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 pt-1">
+          {/* Toggle de tipo */}
+          <div className="flex flex-wrap gap-1.5">
+            {WIZARD_TYPES.map(({ type: t, label }) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => {
+                  setType(t);
+                  setLocation("");
+                  setCoords({ lat: null, lng: null, formatted_address: null });
+                }}
+                className={cn(
+                  "rounded-full border px-3 py-1.5 text-xs transition",
+                  type === t
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-foreground/70 hover:border-primary/40",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Nome */}
+          <div className="space-y-1.5">
+            <Label>{nameLabel}</Label>
+            <Input
+              autoFocus
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder=""
+              className="h-11 rounded-xl"
+            />
+          </div>
+
+          {/* Data e hora */}
+          <div className={cn("grid gap-3", showTime ? "grid-cols-2" : "grid-cols-1")}>
+            <div className="space-y-1.5">
+              <Label>{dateLabelText}</Label>
+              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-11 rounded-xl" />
+            </div>
+            {showTime && (
+              <div className="space-y-1.5">
+                <Label>Hora (opcional)</Label>
+                <Input
+                  type="text"
+                  value={time}
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/[^\d:]/g, "");
+                    if (v.length === 2 && !v.includes(":") && time.length === 1) setTime(v + ":");
+                    else if (v.length <= 5) setTime(v);
+                  }}
+                  placeholder="HH:MM"
+                  maxLength={5}
+                  className="h-11 rounded-xl"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Local */}
+          {showLocation && (
+            <div className="space-y-1.5">
+              <Label>{locationLabel}</Label>
+              <PlaceAutocomplete
+                value={location}
+                onChange={(v) => { setLocation(v); setCoords({ lat: null, lng: null, formatted_address: null }); }}
+                onSelect={(s) => setCoords(s)}
+                placeholder={locationPlaceholder}
+                className="h-11 rounded-xl"
+              />
+              {(coords.formatted_address || location) && (
+                <div className="pt-1">
+                  <MapsActions
+                    query={coords.formatted_address ?? location}
+                    lat={coords.lat}
+                    lng={coords.lng}
+                    size="md"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          <p className="text-xs text-muted-foreground">
+            {type === "place" && "Categoria, fotos e avaliação podem ser preenchidos depois em Lugares."}
+            {type === "recipe" && "Ingredientes e passo a passo podem ser preenchidos depois em Receitas."}
+            {type === "entertainment" && "Mais detalhes podem ser preenchidos depois em Entretenimento."}
+          </p>
+
+          <Button onClick={save} disabled={busy || !name} className="w-full rounded-xl">
+            {busy ? "Salvando..." : "Criar"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -400,7 +667,18 @@ function EventFormDialog({
         <div><Label>Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} className="rounded-xl" /></div>
         <div className="grid grid-cols-2 gap-3">
           <div><Label>Data</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-xl" /></div>
-          <div><Label>Hora</Label><Input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="rounded-xl" /></div>
+          <div><Label>Hora</Label><Input
+            type="text"
+            value={time}
+            onChange={(e) => {
+              const v = e.target.value.replace(/[^\d:]/g, "");
+              if (v.length === 2 && !v.includes(":") && time.length === 1) setTime(v + ":");
+              else if (v.length <= 5) setTime(v);
+            }}
+            placeholder="HH:MM"
+            maxLength={5}
+            className="rounded-xl"
+          /></div>
         </div>
         <div>
           <Label>Categoria</Label>
@@ -423,7 +701,6 @@ function EventFormDialog({
           />
         </div>
         <div><Label>Descrição</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} className="rounded-xl" /></div>
-
         <div>
           <Label className="flex items-center gap-1"><Tag className="h-3 w-3" /> Tags</Label>
           <div className="flex flex-wrap gap-1.5">
@@ -443,7 +720,6 @@ function EventFormDialog({
             <Button type="button" variant="outline" onClick={addTag} className="rounded-xl">+</Button>
           </div>
         </div>
-
         <div>
           <Label>Participantes</Label>
           <div className="flex flex-wrap gap-1.5">
@@ -463,7 +739,6 @@ function EventFormDialog({
             <Button type="button" variant="outline" onClick={addPart} className="rounded-xl">+</Button>
           </div>
         </div>
-
         <div>
           <Label>Fotos</Label>
           <div className="flex flex-wrap gap-2">
@@ -476,9 +751,7 @@ function EventFormDialog({
             </label>
           </div>
         </div>
-
         <div><Label>Observações</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="rounded-xl" /></div>
-
         <div className="flex gap-2 pt-2">
           {mode === "edit" && (
             <>
