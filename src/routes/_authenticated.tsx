@@ -54,7 +54,7 @@ function AuthenticatedLayout() {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar md:flex md:flex-col">
+      <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar md:flex md:flex-col sticky top-0 h-screen">
         <div className="px-6 py-7">
           <Link to="/home" className="block">
             <p className="font-serif text-xl leading-tight text-foreground">
