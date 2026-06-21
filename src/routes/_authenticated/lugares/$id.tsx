@@ -17,6 +17,8 @@ import { MapsActions } from "@/components/maps-actions";
 import { ArrowLeft, Heart, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/_authenticated/lugares/$id")({
   component: PlaceDetailPage,
@@ -56,6 +58,20 @@ function PlaceDetailPage() {
         .single();
       if (error) throw error;
       return data as PlaceFull;
+    },
+  });
+
+  const { data: linkedEvent } = useQuery({
+    queryKey: ["place-event", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("events")
+        .select("id, date, title")
+        .eq("source_type" as any, "place")
+        .eq("source_id" as any, id)
+        .limit(1)
+        .maybeSingle();
+      return (data ?? null) as { id: string; date: string; title: string } | null;
     },
   });
 
@@ -276,6 +292,12 @@ function PlaceDetailPage() {
               onChange={(e) => setVisitedAt(e.target.value)}
               className="h-11 rounded-xl"
             />
+            {linkedEvent && (
+              <p className="text-xs text-muted-foreground">
+                📅 No calendário em{" "}
+                {format(new Date(linkedEvent.date + "T00:00"), "d 'de' MMMM", { locale: ptBR })}
+              </p>
+            )}
           </div>
         </div>
 
