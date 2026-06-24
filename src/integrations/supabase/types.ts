@@ -296,6 +296,68 @@ export type Database = {
           },
         ]
       }
+      gifts: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          desired_date: string | null
+          estimated_value: number | null
+          id: string
+          link: string | null
+          name: string
+          notes: string | null
+          photo: string | null
+          privacy: string
+          recipient_id: string
+          status: string
+          store: string | null
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          desired_date?: string | null
+          estimated_value?: number | null
+          id?: string
+          link?: string | null
+          name: string
+          notes?: string | null
+          photo?: string | null
+          privacy?: string
+          recipient_id: string
+          status?: string
+          store?: string | null
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          desired_date?: string | null
+          estimated_value?: number | null
+          id?: string
+          link?: string | null
+          name?: string
+          notes?: string | null
+          photo?: string | null
+          privacy?: string
+          recipient_id?: string
+          status?: string
+          store?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gifts_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       place_reviews: {
         Row: {
           comment: string | null
