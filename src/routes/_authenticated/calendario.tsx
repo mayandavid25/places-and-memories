@@ -240,6 +240,7 @@ function CalendarPage() {
         onOpenChange={setOpenNew}
         userId={user?.id}
         coupleId={coupleId}
+        initialDate={initialDate}
         onSaved={() => {
           setOpenNew(false);
           qc.invalidateQueries({ queryKey: ["events"] });
