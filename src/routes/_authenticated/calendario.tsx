@@ -26,6 +26,7 @@ export const Route = createFileRoute("/_authenticated/calendario")({
   component: CalendarPage,
   validateSearch: (search: Record<string, unknown>) => ({
     new: search.new ? Number(search.new) : undefined,
+    date: typeof search.date === "string" ? search.date : undefined,
   }),
 });
 
@@ -70,7 +71,7 @@ function CalendarPage() {
   const [openNew, setOpenNew] = useState(false);
   const [editing, setEditing] = useState<EventRow | null>(null);
 
-  const { new: isNew } = useSearch({ from: "/_authenticated/calendario" });
+  const { new: isNew, date: initialDate } = useSearch({ from: "/_authenticated/calendario" });
 
   useEffect(() => {
     if (isNew) setOpenNew(true);
