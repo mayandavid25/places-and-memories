@@ -3,7 +3,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Home,
   MapPin,
-  Calendar,
+  Gift,
   ChefHat,
   Tv,
   Heart,
@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 const bottomItems = [
   { to: "/home", label: "Home", icon: Home },
   { to: "/lugares", label: "Lugares", icon: MapPin },
-  { to: "/calendario", label: "Calendário", icon: Calendar },
+  { to: "/presentes", label: "Presentes", icon: Gift },
   { to: "/receitas", label: "Receitas", icon: ChefHat },
   { to: "/entretenimento", label: "Lazer", icon: Tv },
 ] as const;
@@ -27,6 +27,7 @@ const quickActions = [
   { to: "/wishlist", label: "Adicionar à wishlist", icon: Heart, search: { new: 1 } },
   { to: "/receitas", label: "Adicionar receita", icon: ChefHat, search: { new: 1 } },
   { to: "/entretenimento", label: "Adicionar entretenimento", icon: Tv, search: undefined },
+  { to: "/presentes", label: "Adicionar presente", icon: Gift, search: { new: 1 } },
   { to: "/calendario", label: "Adicionar evento", icon: CalendarPlus, search: { new: 1 } },
 ] as const;
 
@@ -36,6 +37,7 @@ const directActions: Record<string, { to: string; search?: Record<string, number
   "/wishlist": { to: "/wishlist", search: { new: 1 } },
   "/receitas": { to: "/receitas", search: { new: 1 } },
   "/entretenimento": { to: "/entretenimento", scroll: true },
+  "/presentes": { to: "/presentes", search: { new: 1 } },
   "/calendario": { to: "/calendario", search: { new: 1 } },
 };
 

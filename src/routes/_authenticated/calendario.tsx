@@ -26,6 +26,7 @@ export const Route = createFileRoute("/_authenticated/calendario")({
   component: CalendarPage,
   validateSearch: (search: Record<string, unknown>) => ({
     new: search.new ? Number(search.new) : undefined,
+    date: typeof search.date === "string" ? search.date : undefined,
   }),
 });
 
@@ -70,7 +71,7 @@ function CalendarPage() {
   const [openNew, setOpenNew] = useState(false);
   const [editing, setEditing] = useState<EventRow | null>(null);
 
-  const { new: isNew } = useSearch({ from: "/_authenticated/calendario" });
+  const { new: isNew, date: initialDate } = useSearch({ from: "/_authenticated/calendario" });
 
   useEffect(() => {
     if (isNew) setOpenNew(true);
@@ -239,6 +240,7 @@ function CalendarPage() {
         onOpenChange={setOpenNew}
         userId={user?.id}
         coupleId={coupleId}
+        initialDate={initialDate}
         onSaved={() => {
           setOpenNew(false);
           qc.invalidateQueries({ queryKey: ["events"] });
@@ -272,17 +274,19 @@ function NewEventWizard({
   onOpenChange,
   userId,
   coupleId,
+  initialDate,
   onSaved,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   userId: string | undefined;
   coupleId: string | undefined | null;
+  initialDate?: string;
   onSaved: () => void;
 }) {
   const [type, setType] = useState<WizardType>("place");
   const [name, setName] = useState("");
-  const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [date, setDate] = useState(initialDate ?? format(new Date(), "yyyy-MM-dd"));
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
   const [coords, setCoords] = useState<{ lat: number | null; lng: number | null; formatted_address: string | null }>({ lat: null, lng: null, formatted_address: null });
@@ -292,12 +296,12 @@ function NewEventWizard({
     if (open) {
       setType("place");
       setName("");
-      setDate(format(new Date(), "yyyy-MM-dd"));
+      setDate(initialDate ?? format(new Date(), "yyyy-MM-dd"));
       setTime("");
       setLocation("");
       setCoords({ lat: null, lng: null, formatted_address: null });
     }
-  }, [open]);
+  }, [open, initialDate]);
 
   const save = async () => {
     if (!name || !coupleId || !userId) return;

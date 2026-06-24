@@ -98,6 +98,12 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          planned_date: string | null
+          planned_formatted_address: string | null
+          planned_lat: number | null
+          planned_lng: number | null
+          planned_location: string | null
+          planned_time: string | null
           progress_current: number | null
           progress_note: string | null
           progress_total: number | null
@@ -114,6 +120,12 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
+          planned_date?: string | null
+          planned_formatted_address?: string | null
+          planned_lat?: number | null
+          planned_lng?: number | null
+          planned_location?: string | null
+          planned_time?: string | null
           progress_current?: number | null
           progress_note?: string | null
           progress_total?: number | null
@@ -130,6 +142,12 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
+          planned_date?: string | null
+          planned_formatted_address?: string | null
+          planned_lat?: number | null
+          planned_lng?: number | null
+          planned_location?: string | null
+          planned_time?: string | null
           progress_current?: number | null
           progress_note?: string | null
           progress_total?: number | null
@@ -182,6 +200,13 @@ export type Database = {
             referencedRelation: "entertainment_items"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "entertainment_reviews_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       events: {
@@ -201,6 +226,8 @@ export type Database = {
           participants: string[]
           photos: string[]
           place_id: string | null
+          source_id: string | null
+          source_type: string | null
           status: Database["public"]["Enums"]["event_status"]
           tags: string[]
           time: string | null
@@ -222,6 +249,8 @@ export type Database = {
           participants?: string[]
           photos?: string[]
           place_id?: string | null
+          source_id?: string | null
+          source_type?: string | null
           status?: Database["public"]["Enums"]["event_status"]
           tags?: string[]
           time?: string | null
@@ -243,6 +272,8 @@ export type Database = {
           participants?: string[]
           photos?: string[]
           place_id?: string | null
+          source_id?: string | null
+          source_type?: string | null
           status?: Database["public"]["Enums"]["event_status"]
           tags?: string[]
           time?: string | null
@@ -261,6 +292,68 @@ export type Database = {
             columns: ["place_id"]
             isOneToOne: false
             referencedRelation: "places"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gifts: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          desired_date: string | null
+          estimated_value: number | null
+          id: string
+          link: string | null
+          name: string
+          notes: string | null
+          photo: string | null
+          privacy: string
+          recipient_id: string
+          status: string
+          store: string | null
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          desired_date?: string | null
+          estimated_value?: number | null
+          id?: string
+          link?: string | null
+          name: string
+          notes?: string | null
+          photo?: string | null
+          privacy?: string
+          recipient_id: string
+          status?: string
+          store?: string | null
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          desired_date?: string | null
+          estimated_value?: number | null
+          id?: string
+          link?: string | null
+          name?: string
+          notes?: string | null
+          photo?: string | null
+          privacy?: string
+          recipient_id?: string
+          status?: string
+          store?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gifts_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
             referencedColumns: ["id"]
           },
         ]
@@ -296,6 +389,13 @@ export type Database = {
             columns: ["place_id"]
             isOneToOne: false
             referencedRelation: "places"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "place_reviews_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -419,6 +519,13 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_comments_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

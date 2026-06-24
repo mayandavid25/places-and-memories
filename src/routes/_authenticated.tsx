@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, useNavigate, Link, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Home, MapPin, Heart, Trophy, Tv, Calendar, User, ChefHat } from "lucide-react";
+import { Home, MapPin, Heart, Trophy, Tv, Gift, User, ChefHat } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MobileNav } from "@/components/mobile-nav";
 import { UserAvatar } from "@/components/user-avatar";
@@ -17,7 +17,7 @@ const navItems = [
   { to: "/receitas", label: "Receitas", icon: ChefHat },
   { to: "/ranking", label: "Ranking", icon: Trophy },
   { to: "/entretenimento", label: "Lazer", icon: Tv },
-  { to: "/calendario", label: "Calendário", icon: Calendar },
+  { to: "/presentes", label: "Presentes", icon: Gift },
   { to: "/perfil", label: "Perfil", icon: User },
 ] as const;
 
