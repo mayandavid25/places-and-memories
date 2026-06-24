@@ -274,17 +274,19 @@ function NewEventWizard({
   onOpenChange,
   userId,
   coupleId,
+  initialDate,
   onSaved,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   userId: string | undefined;
   coupleId: string | undefined | null;
+  initialDate?: string;
   onSaved: () => void;
 }) {
   const [type, setType] = useState<WizardType>("place");
   const [name, setName] = useState("");
-  const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [date, setDate] = useState(initialDate ?? format(new Date(), "yyyy-MM-dd"));
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
   const [coords, setCoords] = useState<{ lat: number | null; lng: number | null; formatted_address: string | null }>({ lat: null, lng: null, formatted_address: null });
@@ -294,12 +296,12 @@ function NewEventWizard({
     if (open) {
       setType("place");
       setName("");
-      setDate(format(new Date(), "yyyy-MM-dd"));
+      setDate(initialDate ?? format(new Date(), "yyyy-MM-dd"));
       setTime("");
       setLocation("");
       setCoords({ lat: null, lng: null, formatted_address: null });
     }
-  }, [open]);
+  }, [open, initialDate]);
 
   const save = async () => {
     if (!name || !coupleId || !userId) return;
