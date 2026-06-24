@@ -8,9 +8,13 @@ import { ScoreInput } from "@/components/score-input";
 import { UserAvatar } from "@/components/user-avatar";
 import { useSignedUrl } from "@/hooks/use-signed-url";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import {
+  addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameDay, isSameMonth,
+  startOfMonth, startOfWeek, subMonths,
+} from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MapPin, Calendar, Trophy, MessageCircle } from "lucide-react";
+import { MapPin, Calendar, Trophy, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/home")({
@@ -59,6 +63,8 @@ function HomePage() {
           O que vamos guardar <span className="italic text-primary">hoje?</span>
         </h1>
       </div>
+
+      <HomeCalendar events={data?.events ?? []} />
 
       <div className="flex flex-col gap-8 md:grid md:grid-cols-2 w-full min-w-0">
         <section className="min-w-0 w-full overflow-hidden">
