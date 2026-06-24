@@ -246,3 +246,104 @@ function TopList({ coupleId, limit = 3 }: { coupleId: string | null | undefined;
     </div>
   );
 }
+function HomeCalendar({ events }: { events: { id: string; title: string; date: string }[] }) {
+  const { profile } = useAuth();
+  const coupleId = profile?.couple_id;
+  const [month, setMonth] = useState(new Date());
+
+  const { data: monthEvents } = useQuery({
+    queryKey: ["home-cal-events", coupleId, format(month, "yyyy-MM")],
+    enabled: !!coupleId,
+    queryFn: async () => {
+      const start = format(startOfMonth(month), "yyyy-MM-dd");
+      const end = format(endOfMonth(month), "yyyy-MM-dd");
+      const { data } = await supabase
+        .from("events")
+        .select("id, title, date")
+        .eq("couple_id", coupleId!)
+        .gte("date", start)
+        .lte("date", end);
+      return (data ?? []) as { id: string; title: string; date: string }[];
+    },
+  });
+
+  const allEvents = [...(monthEvents ?? []), ...events];
+  const seen = new Set<string>();
+  const merged = allEvents.filter((e) => (seen.has(e.id) ? false : (seen.add(e.id), true)));
+
+  const days = eachDayOfInterval({
+    start: startOfWeek(startOfMonth(month), { weekStartsOn: 0 }),
+    end: endOfWeek(endOfMonth(month), { weekStartsOn: 0 }),
+  });
+  const eventsByDay = (d: Date) => merged.filter((e) => isSameDay(new Date(e.date + "T00:00"), d));
+
+  return (
+    <section className="mb-8 rounded-3xl border border-border bg-card p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          <Calendar className="h-3.5 w-3.5" /> Próximos eventos
+        </div>
+        <Link to="/calendario" className="text-xs text-primary hover:underline">
+          Ver calendário completo
+        </Link>
+      </div>
+
+      <div className="mb-3 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setMonth(subMonths(month, 1))}
+          className="rounded-full p-1 text-muted-foreground hover:text-primary"
+          aria-label="Mês anterior"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <h3 className="font-serif text-lg capitalize">{format(month, "MMMM yyyy", { locale: ptBR })}</h3>
+        <button
+          type="button"
+          onClick={() => setMonth(addMonths(month, 1))}
+          className="rounded-full p-1 text-muted-foreground hover:text-primary"
+          aria-label="Próximo mês"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground">
+        {["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => (
+          <div key={i} className="py-1">{d}</div>
+        ))}
+      </div>
+
+      <div className="mt-1 grid grid-cols-7 gap-1">
+        {days.map((d) => {
+          const es = eventsByDay(d);
+          const hasEvent = es.length > 0;
+          const inMonth = isSameMonth(d, month);
+          const dateStr = format(d, "yyyy-MM-dd");
+          return (
+            <Link
+              key={d.toISOString()}
+              to="/calendario"
+              search={{ new: 1, date: dateStr } as any}
+              title={hasEvent ? es.map((e) => e.title).join(", ") : "Adicionar evento"}
+              className={cn(
+                "relative flex aspect-square flex-col items-center justify-center rounded-xl border text-xs transition hover:border-primary/50",
+                inMonth ? "border-border bg-background" : "border-transparent bg-transparent text-muted-foreground/40",
+                isSameDay(d, new Date()) && "ring-2 ring-primary/40",
+              )}
+            >
+              <span className="leading-none">{format(d, "d")}</span>
+              {hasEvent && <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />}
+            </Link>
+          );
+        })}
+      </div>
+
+      <div className="mt-4">
+        <Button asChild variant="outline" className="w-full rounded-full">
+          <Link to="/calendario">Ver calendário completo</Link>
+        </Button>
+      </div>
+    </section>
+  );
+}
