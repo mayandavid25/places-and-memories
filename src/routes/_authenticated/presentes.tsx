@@ -69,34 +69,44 @@ function PresentesPage() {
 
   useEffect(() => { if (isNew) setOpenNew(true); }, [isNew]);
 
-  const { data: members } = useQuery({
+  const { data: members, isLoading: loadingMembers, error: membersError } = useQuery({
     queryKey: ["couple-members", coupleId],
     enabled: !!coupleId,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: cm, error: cmErr } = await supabase
         .from("couple_members")
-        .select("user_id, profiles:user_id(display_name, avatar_url)")
+        .select("user_id")
         .eq("couple_id", coupleId!);
-      return ((data ?? []) as unknown as Array<{
-        user_id: string;
-        profiles: { display_name: string | null; avatar_url: string | null } | null;
-      }>).map((m) => ({
-        user_id: m.user_id,
-        display_name: m.profiles?.display_name ?? null,
-        avatar_url: m.profiles?.avatar_url ?? null,
-      })) as Member[];
+      if (cmErr) throw cmErr;
+      const ids = (cm ?? []).map((m) => m.user_id);
+      if (ids.length === 0) return [] as Member[];
+      const { data: profs, error: pErr } = await supabase
+        .from("profiles")
+        .select("id, display_name, avatar_url")
+        .in("id", ids);
+      if (pErr) throw pErr;
+      const map = new Map((profs ?? []).map((p) => [p.id, p]));
+      return ids.map((id) => {
+        const p = map.get(id);
+        return {
+          user_id: id,
+          display_name: p?.display_name ?? null,
+          avatar_url: p?.avatar_url ?? null,
+        };
+      }) as Member[];
     },
   });
 
-  const { data: gifts } = useQuery({
+  const { data: gifts, error: giftsError } = useQuery({
     queryKey: ["gifts", coupleId, user?.id],
     enabled: !!coupleId && !!user,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("gifts")
         .select("*")
         .eq("couple_id", coupleId!)
         .order("created_at", { ascending: false });
+      if (error) throw error;
       return (data ?? []) as GiftRow[];
     },
   });
