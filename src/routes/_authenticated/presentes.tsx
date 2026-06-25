@@ -130,8 +130,20 @@ function PresentesPage() {
         }
       />
 
-      {!members || members.length === 0 ? (
+      {!coupleId ? (
+        <p className="rounded-2xl border border-dashed border-border bg-background/40 px-4 py-6 text-center text-sm text-muted-foreground">
+          Você ainda não faz parte de um espaço de casal.
+        </p>
+      ) : membersError || giftsError ? (
+        <p className="rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 px-4 py-6 text-center text-sm text-destructive">
+          Não foi possível carregar os presentes.
+        </p>
+      ) : loadingMembers ? (
         <p className="text-sm text-muted-foreground">Carregando...</p>
+      ) : !members || members.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-border bg-background/40 px-4 py-6 text-center text-sm text-muted-foreground">
+          Nenhum presente cadastrado ainda.
+        </p>
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
           {members.map((m) => (
