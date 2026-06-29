@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, useNavigate, Link, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Home, MapPin, Heart, Trophy, Tv, Gift, User, ChefHat } from "lucide-react";
+import { Home, MapPin, Heart, Trophy, Tv, Gift, User, ChefHat, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MobileNav } from "@/components/mobile-nav";
 import { UserAvatar } from "@/components/user-avatar";
@@ -18,6 +18,7 @@ const navItems = [
   { to: "/ranking", label: "Ranking", icon: Trophy },
   { to: "/entretenimento", label: "Lazer", icon: Tv },
   { to: "/presentes", label: "Presentes", icon: Gift },
+  { to: "/calendario", label: "Calendário", icon: Calendar },
   { to: "/perfil", label: "Perfil", icon: User },
 ] as const;
 
@@ -119,9 +120,14 @@ function AuthenticatedLayout() {
           <Link to="/home" className="font-serif text-lg italic text-foreground">
             nossos lugares
           </Link>
-          <Link to="/perfil" className="text-muted-foreground">
-            <UserAvatar name={profile?.display_name} src={profile?.avatar_url} size={32} />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link to="/calendario" search={{} as any} className="text-muted-foreground hover:text-primary">
+              <Calendar className="h-5 w-5" />
+            </Link>
+            <Link to="/perfil" className="text-muted-foreground">
+              <UserAvatar name={profile?.display_name} src={profile?.avatar_url} size={32} />
+            </Link>
+          </div>
         </header>
 
         <main className="w-full min-w-0 flex-1 overflow-y-auto overflow-x-hidden pb-24 md:pb-0">

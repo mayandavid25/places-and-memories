@@ -4,14 +4,13 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { PageShell } from "@/components/page-shell";
-import { ScoreInput } from "@/components/score-input";
+import { StarRating } from "@/components/star-rating";
 import { UserAvatar } from "@/components/user-avatar";
 import { useSignedUrl } from "@/hooks/use-signed-url";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import {
-  addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameDay, isSameMonth,
-  startOfMonth, startOfWeek, subMonths,
+  addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format,
+  isSameDay, isSameMonth, startOfMonth, startOfWeek, subMonths,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MapPin, Calendar, Trophy, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
@@ -64,10 +63,8 @@ function HomePage() {
         </h1>
       </div>
 
-      <HomeCalendar events={data?.events ?? []} />
-
       <div className="flex flex-col gap-8 md:grid md:grid-cols-2 w-full min-w-0">
-        <section className="min-w-0 w-full overflow-hidden">
+        <section className="min-w-0 w-full overflow-hidden md:order-1 order-1">
           <SectionTitle icon={<MapPin className="h-3.5 w-3.5" />} title="Últimos lugares" link="/lugares" />
           <div className="grid gap-2 w-full" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
             {(data?.places ?? []).map((p, idx) => (
@@ -93,27 +90,8 @@ function HomePage() {
           </div>
         </section>
 
-        <section className="space-y-8">
-          <div>
-            <SectionTitle icon={<Calendar className="h-3.5 w-3.5" />} title="Próximas datas" link="/calendario" />
-            <div className="space-y-2">
-              {(data?.events ?? []).map((e) => (
-                <div key={e.id} className="flex items-center gap-4 rounded-2xl border border-border bg-card px-4 py-3">
-                  <div className="text-center">
-                    <p className="font-serif text-xl leading-none">{format(new Date(e.date + "T00:00"), "d")}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      {format(new Date(e.date + "T00:00"), "MMM", { locale: ptBR })}
-                    </p>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{e.title}</p>
-                    {e.location && <p className="truncate text-xs text-muted-foreground">{e.location}</p>}
-                  </div>
-                </div>
-              ))}
-              {data && data.events.length === 0 && <EmptyHint text="Nenhum evento futuro" />}
-            </div>
-          </div>
+        <section className="space-y-8 md:order-2 order-2">
+          <HomeCalendar events={data?.events ?? []} coupleId={coupleId} />
 
           <div>
             <SectionTitle
@@ -186,10 +164,10 @@ function SectionTitle({ icon, title, link, action }: { icon: React.ReactNode; ti
 }
 
 function PlaceCover({ path }: { path: string | null }) {
-  const url = useSignedUrl(path, 400);
+  const url = useSignedUrl(path);
   return (
     <div className="aspect-square w-full bg-muted">
-      {url && <img src={url} alt="" loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />}
+      {url && <img src={url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />}
     </div>
   );
 }
@@ -239,16 +217,23 @@ function TopList({ coupleId, limit = 3 }: { coupleId: string | null | undefined;
             <p className="truncate text-sm font-medium">{p.name}</p>
             <p className="text-xs capitalize text-muted-foreground">{p.category}</p>
           </div>
-          <ScoreInput value={p.avg} readOnly />
+          <span className="flex items-center gap-1 text-sm font-medium text-primary">
+            ★ {p.avg % 1 === 0 ? p.avg : p.avg.toFixed(1)}
+          </span>
         </Link>
       ))}
       {data && data.length === 0 && <EmptyHint text="Avalie lugares para ver o ranking" />}
     </div>
   );
 }
-function HomeCalendar({ events }: { events: { id: string; title: string; date: string }[] }) {
-  const { profile } = useAuth();
-  const coupleId = profile?.couple_id;
+
+function HomeCalendar({
+  events,
+  coupleId,
+}: {
+  events: { id: string; title: string; date: string; time?: string | null; location?: string | null }[];
+  coupleId: string | null | undefined;
+}) {
   const [month, setMonth] = useState(new Date());
 
   const { data: monthEvents } = useQuery({
@@ -259,11 +244,11 @@ function HomeCalendar({ events }: { events: { id: string; title: string; date: s
       const end = format(endOfMonth(month), "yyyy-MM-dd");
       const { data } = await supabase
         .from("events")
-        .select("id, title, date")
+        .select("id, title, date, time, location")
         .eq("couple_id", coupleId!)
         .gte("date", start)
         .lte("date", end);
-      return (data ?? []) as { id: string; title: string; date: string }[];
+      return (data ?? []) as { id: string; title: string; date: string; time?: string | null; location?: string | null }[];
     },
   });
 
@@ -275,75 +260,76 @@ function HomeCalendar({ events }: { events: { id: string; title: string; date: s
     start: startOfWeek(startOfMonth(month), { weekStartsOn: 0 }),
     end: endOfWeek(endOfMonth(month), { weekStartsOn: 0 }),
   });
+
   const eventsByDay = (d: Date) => merged.filter((e) => isSameDay(new Date(e.date + "T00:00"), d));
 
   return (
-    <section className="mb-8 rounded-3xl border border-border bg-card p-5">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5" /> Próximos eventos
+    <div>
+      <SectionTitle icon={<Calendar className="h-3.5 w-3.5" />} title="Próximas datas" link="/calendario" />
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setMonth(subMonths(month, 1))}
+            className="rounded-full p-1 text-muted-foreground hover:text-primary"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <h3 className="font-serif text-base capitalize">{format(month, "MMMM yyyy", { locale: ptBR })}</h3>
+          <button
+            type="button"
+            onClick={() => setMonth(addMonths(month, 1))}
+            className="rounded-full p-1 text-muted-foreground hover:text-primary"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
-        <Link to="/calendario" className="text-xs text-primary hover:underline">
-          Ver calendário completo
-        </Link>
+        <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground">
+          {["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => (
+            <div key={i} className="py-1">{d}</div>
+          ))}
+        </div>
+        <div className="mt-1 grid grid-cols-7 gap-1">
+          {days.map((d) => {
+            const es = eventsByDay(d);
+            const hasEvent = es.length > 0;
+            const inMonth = isSameMonth(d, month);
+            return (
+              <Link
+                key={d.toISOString()}
+                to="/calendario"
+                search={{} as any}
+                title={hasEvent ? es.map((e) => e.title).join(", ") : undefined}
+                className={cn(
+                  "relative flex aspect-square flex-col items-center justify-center rounded-xl border text-xs transition hover:border-primary/50",
+                  inMonth ? "border-border bg-background" : "border-transparent bg-transparent text-muted-foreground/40",
+                  isSameDay(d, new Date()) && "ring-2 ring-primary/40",
+                )}
+              >
+                <span className="leading-none">{format(d, "d")}</span>
+                {hasEvent && <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />}
+              </Link>
+            );
+          })}
+        </div>
+        {merged.filter((e) => e.date >= new Date().toISOString().slice(0, 10)).slice(0, 3).length > 0 && (
+          <div className="mt-4 space-y-2 border-t border-border pt-4">
+            {merged
+              .filter((e) => e.date >= new Date().toISOString().slice(0, 10))
+              .sort((a, b) => a.date.localeCompare(b.date))
+              .slice(0, 3)
+              .map((e) => (
+                <div key={e.id} className="flex items-center gap-3">
+                  <div className="text-center w-8">
+                    <p className="font-serif text-base leading-none">{format(new Date(e.date + "T00:00"), "d")}</p>
+                    <p className="text-[10px] uppercase text-muted-foreground">{format(new Date(e.date + "T00:00"), "MMM", { locale: ptBR })}</p>
+                  </div>
+                  <p className="truncate text-sm">{e.title}</p>
+                </div>
+              ))}
+          </div>
+        )}
       </div>
-
-      <div className="mb-3 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => setMonth(subMonths(month, 1))}
-          className="rounded-full p-1 text-muted-foreground hover:text-primary"
-          aria-label="Mês anterior"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <h3 className="font-serif text-lg capitalize">{format(month, "MMMM yyyy", { locale: ptBR })}</h3>
-        <button
-          type="button"
-          onClick={() => setMonth(addMonths(month, 1))}
-          className="rounded-full p-1 text-muted-foreground hover:text-primary"
-          aria-label="Próximo mês"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      </div>
-
-      <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground">
-        {["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => (
-          <div key={i} className="py-1">{d}</div>
-        ))}
-      </div>
-
-      <div className="mt-1 grid grid-cols-7 gap-1">
-        {days.map((d) => {
-          const es = eventsByDay(d);
-          const hasEvent = es.length > 0;
-          const inMonth = isSameMonth(d, month);
-          const dateStr = format(d, "yyyy-MM-dd");
-          return (
-            <Link
-              key={d.toISOString()}
-              to="/calendario"
-              search={{ new: 1, date: dateStr } as any}
-              title={hasEvent ? es.map((e) => e.title).join(", ") : "Adicionar evento"}
-              className={cn(
-                "relative flex aspect-square flex-col items-center justify-center rounded-xl border text-xs transition hover:border-primary/50",
-                inMonth ? "border-border bg-background" : "border-transparent bg-transparent text-muted-foreground/40",
-                isSameDay(d, new Date()) && "ring-2 ring-primary/40",
-              )}
-            >
-              <span className="leading-none">{format(d, "d")}</span>
-              {hasEvent && <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />}
-            </Link>
-          );
-        })}
-      </div>
-
-      <div className="mt-4">
-        <Button asChild variant="outline" className="w-full rounded-full">
-          <Link to="/calendario">Ver calendário completo</Link>
-        </Button>
-      </div>
-    </section>
+    </div>
   );
 }
