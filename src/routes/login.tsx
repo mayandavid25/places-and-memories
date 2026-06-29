@@ -91,7 +91,7 @@ function LoginPage() {
           </p>
         </div>
 
-        <div className="rounded-3xl border border-border/60 bg-card/80 p-8 shadow-[0_30px_80px_-40px_rgba(120,40,30,0.25)] backdrop-blur">
+        <div className="rounded-3xl border border-border/60 bg-card/80 p-8 backdrop-blur">
           <h1 className="font-serif text-3xl text-foreground">
             {mode === "login" && "Entrar"}
             {mode === "signup" && "Criar conta"}

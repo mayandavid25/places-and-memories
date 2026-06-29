@@ -75,7 +75,7 @@ export function MobileNav() {
         aria-label="Ações rápidas"
         onClick={handleFab}
         className={cn(
-          "fixed right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition active:scale-95 md:hidden",
+          "fixed right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground transition active:scale-95 md:hidden",
         )}
         style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 88px)" }}
       >

@@ -274,7 +274,7 @@ function PerfilPage() {
         <div className="flex items-center gap-5">
           <div className="relative">
             <UserAvatar name={profile?.display_name} src={profile?.avatar_url} size={80} />
-            <label className="absolute -bottom-1 -right-1 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground shadow">
+            <label className="absolute -bottom-1 -right-1 cursor-pointer rounded-full bg-primary p-2 text-primary-foreground">
               <Upload className="h-3.5 w-3.5" />
               <input type="file" accept="image/*" className="hidden" onChange={onAvatar} />
             </label>

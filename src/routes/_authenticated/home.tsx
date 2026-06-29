@@ -73,7 +73,7 @@ function HomePage() {
                 to="/lugares/$id"
                 params={{ id: p.id }}
                 className={cn(
-                  "group block w-full min-w-0 overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-md",
+                  "group block w-full min-w-0 overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5",
                   idx >= 4 && "hidden md:block",
                 )}
               >

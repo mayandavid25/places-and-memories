@@ -232,9 +232,9 @@ function RecipeCard({ recipe, onOpen }: { recipe: RecipeRow; onOpen: () => void 
   return (
     <button
       onClick={onOpen}
-      className="group block overflow-hidden rounded-2xl border border-border bg-card text-left transition hover:-translate-y-0.5 hover:shadow-lg"
+      className="group block overflow-hidden rounded-2xl border border-border bg-card text-left transition hover:-translate-y-0.5"
     >
-      <div className="relative aspect-[3/4] w-full bg-muted">
+      <div className="relative aspect-3/4 w-full bg-muted">
         {url ? (
           <img src={url} alt={recipe.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
         ) : (
@@ -842,7 +842,7 @@ function RecipeDetailDialog({
 function CoverDisplay({ path }: { path: string | null }) {
   const url = useSignedUrl(path, 800);
   return (
-    <div className="aspect-[16/9] w-full overflow-hidden rounded-2xl bg-muted">
+    <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted">
       {url ? (
         <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
       ) : (

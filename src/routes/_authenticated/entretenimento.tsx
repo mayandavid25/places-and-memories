@@ -215,7 +215,7 @@ function EntCard({
   return (
     <button
       onClick={onOpen}
-      className="group block overflow-hidden rounded-2xl border border-border bg-card text-left transition hover:-translate-y-0.5 hover:shadow-lg"
+      className="group block overflow-hidden rounded-2xl border border-border bg-card text-left transition hover:-translate-y-0.5"
     >
       <div className="relative aspect-[2/3] w-full bg-muted">
         {url ? (

@@ -212,7 +212,7 @@ function PlaceCard({ place }: { place: PlaceRow & { avg: number } }) {
     <Link
       to="/lugares/$id"
       params={{ id: place.id }}
-      className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-lg"
+      className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5"
     >
       <div className="relative aspect-[3/4] w-full bg-muted">
         {url && <img src={url} alt={place.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />}
