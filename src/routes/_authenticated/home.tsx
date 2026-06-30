@@ -58,8 +58,8 @@ function HomePage() {
     <PageShell>
       <div className="mb-10">
         <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Olá {profile?.display_name}</p>
-        <h1 className="mt-2 text-4xl font-medium text-foreground sm:text-5xl">
-          O que vamos guardar <span className="italic text-primary">hoje?</span>
+        <h1 className="mt-2 text-4xl font-normal text-foreground sm:text-5xl" style={{ fontFamily: "'Instrument Serif', serif" }}>
+          O que vamos <span className="italic text-primary">guardar</span> hoje?
         </h1>
       </div>
 
