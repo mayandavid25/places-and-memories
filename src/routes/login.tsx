@@ -92,7 +92,7 @@ function LoginPage() {
         </div>
 
         <div className="rounded-3xl border border-border/60 bg-card/80 p-8 backdrop-blur">
-          <h1 className="font-serif text-3xl text-foreground">
+          <h1 className="text-3xl font-medium text-foreground">
             {mode === "login" && "Entrar"}
             {mode === "signup" && "Criar conta"}
             {mode === "reset" && "Recuperar senha"}

@@ -207,7 +207,7 @@ return (
       <Sheet open={reviewSheetOpen} onOpenChange={setReviewSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-3xl">
           <SheetHeader>
-            <SheetTitle className="font-serif text-xl">Como foi?</SheetTitle>
+            <SheetTitle className="text-xl font-medium">Como foi?</SheetTitle>
           </SheetHeader>
           <div className="mt-4 space-y-4 pb-6">
             <p className="text-sm text-muted-foreground">Deixa uma avaliação do lugar — é opcional!</p>
@@ -305,7 +305,7 @@ function WishlistRow({
         )}
         <button onClick={onOpen} className="min-w-0 flex-1 space-y-1.5 text-left">
           {/* Linha 1: nome em destaque */}
-          <p className="break-words text-sm font-medium leading-snug">{item.name}</p>
+          <p className="wrap-break-word text-sm font-medium leading-snug">{item.name}</p>
 
           {/* Linha 2: categoria como pill + privado + data */}
           <div className="flex flex-wrap items-center gap-1.5">
@@ -348,7 +348,7 @@ function WishlistRow({
           <span />
         )}
         <Select value={item.status} onValueChange={onStatus}>
-          <SelectTrigger className="h-8 w-auto min-w-[9rem] rounded-full text-xs">
+          <SelectTrigger className="h-8 w-auto min-w-36 rounded-full text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

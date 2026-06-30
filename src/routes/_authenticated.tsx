@@ -58,11 +58,9 @@ function AuthenticatedLayout() {
       <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar md:flex md:flex-col sticky top-0 h-screen">
         <div className="px-6 py-7">
           <Link to="/home" className="block">
-            <p className="font-serif text-xl leading-tight text-foreground">
-              Nossos lugares
-            </p>
-            <p className="font-serif text-xl italic leading-tight text-primary">
-              e memórias
+            <p className="text-xl font-medium leading-tight text-foreground">
+              Nossas{" "}
+              <span className="font-serif italic text-primary">Memórias</span>
             </p>
           </Link>
         </div>
@@ -117,8 +115,8 @@ function AuthenticatedLayout() {
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Mobile top bar */}
         <header className="flex items-center justify-between border-b border-border px-5 py-4 md:hidden">
-          <Link to="/home" className="font-serif text-lg italic text-foreground">
-            nossos lugares
+          <Link to="/home" className="text-lg font-medium text-foreground">
+            Nossas <span className="font-serif italic text-primary">Memórias</span>
           </Link>
           <div className="flex items-center gap-3">
             <Link to="/calendario" search={{} as any} className="text-muted-foreground hover:text-primary">

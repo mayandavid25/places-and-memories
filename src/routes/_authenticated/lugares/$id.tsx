@@ -265,7 +265,7 @@ function PlaceDetailPage() {
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="h-11 rounded-xl font-serif text-xl"
+            className="h-11 rounded-xl text-xl font-medium"
           />
         </div>
 
@@ -334,7 +334,7 @@ function PlaceDetailPage() {
 
       {/* Reviews */}
       <section className="mt-10">
-        <h2 className="mb-4 font-serif text-2xl">Avaliações</h2>
+        <h2 className="mb-4 text-2xl font-medium">Avaliações</h2>
         {reviews && reviews.length > 0 ? (
           <>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -426,7 +426,7 @@ function ReviewForm({ placeId, existing }: { placeId: string; existing: Existing
 
   return (
     <div className="mt-8 rounded-2xl border border-border bg-card p-5">
-      <h3 className="font-serif text-lg">{existing ? "Sua avaliação" : "Adicionar avaliação"}</h3>
+      <h3 className="text-lg font-medium">{existing ? "Sua avaliação" : "Adicionar avaliação"}</h3>
       <div className="mt-3">
         <ScoreInput value={rating} onChange={setRating} />
       </div>

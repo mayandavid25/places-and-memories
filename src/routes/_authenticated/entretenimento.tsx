@@ -161,7 +161,7 @@ function EntList({ type }: { type: EntertainmentType }) {
           return (
             <section key={status}>
               <div className="mb-3 flex items-baseline gap-2">
-                <h3 className="font-serif text-lg italic text-foreground">
+                <h3 className="text-lg font-medium text-foreground">
                   {ENT_STATUS_LABEL[status]}
                 </h3>
                 <span className="text-xs text-muted-foreground">{items.length}</span>
@@ -217,7 +217,7 @@ function EntCard({
       onClick={onOpen}
       className="group block overflow-hidden rounded-2xl border border-border bg-card text-left transition hover:-translate-y-0.5"
     >
-      <div className="relative aspect-[2/3] w-full bg-muted">
+      <div className="relative aspect-2/3 w-full bg-muted">
         {url ? (
           <img
             src={url}
@@ -511,13 +511,13 @@ function EntDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl">{item?.title ?? "..."}</DialogTitle>
+          <DialogTitle className="text-2xl font-medium">{item?.title ?? "..."}</DialogTitle>
         </DialogHeader>
 
         {item && (
           <div className="space-y-5">
             <div className="flex gap-4">
-              <div className="relative aspect-[2/3] w-32 shrink-0 overflow-hidden rounded-2xl bg-muted">
+              <div className="relative aspect-2/3 w-32 shrink-0 overflow-hidden rounded-2xl bg-muted">
                 {coverUrl ? (
                   <img src={coverUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
                 ) : (
@@ -631,7 +631,7 @@ function EntDetailDialog({
 
             {status === "consumindo" && (
               <div className="rounded-2xl border border-border bg-card/60 p-4">
-                <h4 className="mb-3 font-serif text-base italic text-foreground">Onde paramos</h4>
+                <h4 className="mb-3 text-base font-medium text-foreground">Onde paramos</h4>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label className="text-xs">{progressUnitLabel.label} atual</Label>
@@ -655,7 +655,7 @@ function EntDetailDialog({
             )}
 
             <div className="space-y-3">
-              <h4 className="font-serif text-base italic">Avaliações</h4>
+              <h4 className="text-base font-medium">Avaliações</h4>
               {reviews && reviews.length > 0 ? (
                 <div className="space-y-2">
                   {reviews.map((r) => {
@@ -691,7 +691,7 @@ function EntDetailDialog({
               )}
 
               <div className="rounded-2xl border border-border bg-card p-4">
-                <p className="font-serif text-base">{myReview ? "Sua avaliação" : "Adicionar avaliação"}</p>
+                <p className="text-base font-medium">{myReview ? "Sua avaliação" : "Adicionar avaliação"}</p>
                 <div className="mt-2">
                   <ScoreInput value={rating} onChange={setRating} />
                 </div>

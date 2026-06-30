@@ -280,7 +280,7 @@ function PerfilPage() {
             </label>
           </div>
           <div>
-            <p className="font-serif text-2xl">{profile?.display_name}</p>
+            <p className="text-2xl font-medium">{profile?.display_name}</p>
             <p className="text-sm text-muted-foreground">{user?.email}</p>
           </div>
         </div>
@@ -315,7 +315,7 @@ function PerfilPage() {
       {/* Convidar parceiro/a */}
       {profile?.couple_id && (
         <div className="mt-6 rounded-3xl border border-border bg-card p-6 sm:p-8">
-          <h2 className="font-serif text-xl">Convidar parceiro/a</h2>
+          <h2 className="text-xl font-medium">Convidar parceiro/a</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Envie este código para conectar outra pessoa ao seu espaço.
           </p>
@@ -351,7 +351,7 @@ function PerfilPage() {
       {/* Meus espaços */}
       <div className="mt-6 rounded-3xl border border-border bg-card p-6 sm:p-8">
         <div className="flex items-center justify-between">
-          <h2 className="font-serif text-xl">Meus espaços</h2>
+          <h2 className="text-xl font-medium">Meus espaços</h2>
           <span className="text-xs text-muted-foreground">{spaces?.length ?? 0} no total</span>
         </div>
 
@@ -418,7 +418,7 @@ function PerfilPage() {
       <div className="mt-6 rounded-3xl border border-border bg-card p-6 sm:p-8">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-destructive" />
-          <h2 className="font-serif text-xl">Zona de risco</h2>
+          <h2 className="text-xl font-medium">Zona de risco</h2>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">Ações irreversíveis. Confirme com atenção.</p>
 

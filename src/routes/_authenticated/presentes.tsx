@@ -205,7 +205,7 @@ function RecipientColumn({
           <UserAvatar name={member.display_name} src={member.avatar_url} size={36} />
           <div>
             <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Presentes para</p>
-            <p className="font-serif text-xl">{member.display_name ?? "—"}</p>
+            <p className="text-xl font-medium">{member.display_name ?? "—"}</p>
           </div>
         </div>
         <Button size="sm" variant="outline" className="rounded-full" onClick={onAdd}>

@@ -109,7 +109,7 @@ function CalendarPage() {
       <div className="rounded-3xl border border-border bg-card p-5">
         <div className="mb-4 flex items-center justify-between">
           <button onClick={() => setMonth(subMonths(month, 1))} className="text-sm text-muted-foreground hover:text-primary">←</button>
-          <h2 className="font-serif text-xl capitalize">{format(month, "MMMM yyyy", { locale: ptBR })}</h2>
+          <h2 className="text-xl font-medium capitalize">{format(month, "MMMM yyyy", { locale: ptBR })}</h2>
           <button onClick={() => setMonth(addMonths(month, 1))} className="text-sm text-muted-foreground hover:text-primary">→</button>
         </div>
         <div className="grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground">

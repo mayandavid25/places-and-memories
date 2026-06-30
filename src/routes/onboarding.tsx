@@ -81,7 +81,7 @@ function OnboardingPage() {
       <div className="w-full max-w-md rounded-3xl border border-border bg-card p-8 shadow-sm">
         {generatedCode ? (
           <>
-            <h1 className="font-serif text-3xl">Seu código</h1>
+            <h1 className="text-3xl font-medium">Seu código</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Compartilhe com seu par para entrarem no mesmo espaço.
             </p>
@@ -94,7 +94,7 @@ function OnboardingPage() {
           </>
         ) : mode === "choose" ? (
           <>
-            <h1 className="font-serif text-3xl">Bem-vindo</h1>
+            <h1 className="text-3xl font-medium">Bem-vindo</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Criem um espaço compartilhado para registrar memórias juntos.
             </p>
@@ -109,7 +109,7 @@ function OnboardingPage() {
           </>
         ) : mode === "create" ? (
           <>
-            <h1 className="font-serif text-3xl">Criar espaço</h1>
+            <h1 className="text-3xl font-medium">Criar espaço</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Vamos gerar um código para você compartilhar.
             </p>
@@ -122,7 +122,7 @@ function OnboardingPage() {
           </>
         ) : (
           <>
-            <h1 className="font-serif text-3xl">Entrar com código</h1>
+            <h1 className="text-3xl font-medium">Entrar com código</h1>
             <div className="mt-6 space-y-1.5">
               <Label htmlFor="code">Código</Label>
               <Input

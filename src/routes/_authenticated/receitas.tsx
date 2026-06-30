@@ -189,7 +189,7 @@ function ReceitasPage() {
       {filtered.length === 0 && (
         <div className="rounded-3xl border border-dashed border-border bg-card/40 py-20 text-center">
           <ChefHat className="mx-auto h-8 w-8 text-muted-foreground" />
-          <p className="mt-3 font-serif text-2xl italic text-muted-foreground">
+          <p className="mt-3 text-2xl italic text-muted-foreground">
             nenhuma receita ainda
           </p>
           <Button onClick={() => setCreating(true)} className="mt-6 rounded-full">
@@ -276,7 +276,7 @@ function CreateRecipeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl">Nova receita</DialogTitle>
+          <DialogTitle className="text-2xl font-medium">Nova receita</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
@@ -567,7 +567,7 @@ function RecipeDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl">
+          <DialogTitle className="text-2xl font-medium">
             {recipe?.name ?? "Receita"}
           </DialogTitle>
         </DialogHeader>

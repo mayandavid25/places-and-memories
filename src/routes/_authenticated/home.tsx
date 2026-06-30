@@ -58,7 +58,7 @@ function HomePage() {
     <PageShell>
       <div className="mb-10">
         <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Olá {profile?.display_name}</p>
-        <h1 className="mt-2 font-serif text-4xl text-foreground sm:text-5xl">
+        <h1 className="mt-2 text-4xl font-medium text-foreground sm:text-5xl">
           O que vamos guardar <span className="italic text-primary">hoje?</span>
         </h1>
       </div>
@@ -275,7 +275,7 @@ function HomeCalendar({
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <h3 className="font-serif text-base capitalize">{format(month, "MMMM yyyy", { locale: ptBR })}</h3>
+          <h3 className="text-base font-medium capitalize">{format(month, "MMMM yyyy", { locale: ptBR })}</h3>
           <button
             type="button"
             onClick={() => setMonth(addMonths(month, 1))}

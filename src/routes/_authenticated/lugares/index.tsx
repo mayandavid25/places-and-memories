@@ -214,7 +214,7 @@ function PlaceCard({ place }: { place: PlaceRow & { avg: number } }) {
       params={{ id: place.id }}
       className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5"
     >
-      <div className="relative aspect-[3/4] w-full bg-muted">
+      <div className="relative aspect-3/4 w-full bg-muted">
         {url && <img src={url} alt={place.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />}
         {place.favorited && (
           <span className="absolute right-2 top-2 rounded-full bg-background/90 p-1.5">

@@ -40,7 +40,7 @@ function RankingPage() {
             .slice(0, 5);
           return (
             <section key={cat} className="rounded-3xl border border-border bg-card p-6">
-              <h2 className="mb-4 font-serif text-2xl">{CATEGORY_LABEL_PLURAL[cat as PlaceCategory]}</h2>
+              <h2 className="mb-4 text-2xl font-medium">{CATEGORY_LABEL_PLURAL[cat as PlaceCategory]}</h2>
               <div className="space-y-2">
                 {list.map((p, idx) => (
                   <Link key={p.id} to="/lugares/$id" params={{ id: p.id }} className="flex items-center gap-4 rounded-xl px-2 py-2 transition hover:bg-muted/50">
