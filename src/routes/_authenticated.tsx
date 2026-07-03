@@ -41,6 +41,19 @@ function AuthenticatedLayout() {
   }, [user, profile, loading, navigate, pathname]);
 
   if (loading || !user) {
+    const savedColor = typeof window !== "undefined" ? localStorage.getItem("user-color") : null;
+    if (savedColor) {
+      const r = document.documentElement;
+      r.style.setProperty("--primary", savedColor);
+      r.style.setProperty("--ring", savedColor);
+      r.style.setProperty("--rose-burnt", savedColor);
+      r.style.setProperty("--chart-1", savedColor);
+      r.style.setProperty("--sidebar-primary", savedColor);
+      r.style.setProperty("--accent", `color-mix(in srgb, ${savedColor} 12%, white)`);
+      r.style.setProperty("--secondary", `color-mix(in srgb, ${savedColor} 8%, white)`);
+      r.style.setProperty("--sidebar-accent", `color-mix(in srgb, ${savedColor} 10%, white)`);
+      r.style.setProperty("--muted", `color-mix(in srgb, ${savedColor} 6%, white)`);
+    }
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="font-serif italic text-muted-foreground">um momento...</div>

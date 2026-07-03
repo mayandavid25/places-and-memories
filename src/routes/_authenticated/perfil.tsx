@@ -46,7 +46,9 @@ function PerfilPage() {
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
   const [name, setName] = useState(profile?.display_name ?? "");
-const [color, setColor] = useState(profile?.color ?? "#ff9ebd");
+const [color, setColor] = useState(
+  profile?.color ?? localStorage.getItem("user-color") ?? "#ff9ebd"
+);
   const [busy, setBusy] = useState(false);
   const deleteAccountFn = useServerFn(deleteAccount);
 
