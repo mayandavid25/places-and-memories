@@ -134,11 +134,16 @@ const [color, setColor] = useState(profile?.color ?? "#ff9ebd");
   };
 
   const saveColor = async (newColor: string) => {
-  if (!user) return;
-  setColor(newColor);
-  const { error } = await supabase.from("profiles").update({ color: newColor } as any).eq("id", user.id);
-  if (error) return toast.error(error.message);
-  await refreshProfile();
+    if (!user) return;
+    setColor(newColor);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ color: newColor } as any)
+      .eq("id", user.id);
+    if (error) { toast.error(error.message); return; }
+    localStorage.setItem("user-color", newColor);
+    await refreshProfile();
+    toast.success("Cor salva!");
   };
 
   const onAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -304,15 +309,18 @@ const [color, setColor] = useState(profile?.color ?? "#ff9ebd");
 
         <div className="mt-6 space-y-2">
           <Label>Minha cor</Label>
-          <label className="flex h-10 w-fit items-center gap-3 rounded-xl border border-border px-3">
-            <input
-              type="color"
-              value={color}
-              onChange={(e) => saveColor(e.target.value)}
-              className="h-6 w-6 cursor-pointer rounded-full border-none bg-transparent p-0"
-            />
-            <span className="text-sm text-muted-foreground">{color}</span>
-          </label>
+          <div className="flex items-center gap-2">
+            <label className="flex h-10 w-fit cursor-pointer items-center gap-3 rounded-xl border border-border px-3">
+              <input
+                type="color"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="h-6 w-6 cursor-pointer rounded-full border-none bg-transparent p-0"
+              />
+              <span className="text-sm text-muted-foreground">{color}</span>
+            </label>
+            <Button onClick={() => saveColor(color)} className="rounded-xl">Salvar</Button>
+          </div>
         </div>
 
         <div className="mt-8 grid grid-cols-3 gap-3 text-center">

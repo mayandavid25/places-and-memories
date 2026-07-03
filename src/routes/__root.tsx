@@ -85,9 +85,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            try {
+              var color = localStorage.getItem('user-color');
+              if (color) {
+                var r = document.documentElement;
+                r.style.setProperty('--primary', color);
+                r.style.setProperty('--ring', color);
+                r.style.setProperty('--rose-burnt', color);
+                r.style.setProperty('--chart-1', color);
+                r.style.setProperty('--sidebar-primary', color);
+                r.style.setProperty('--accent', 'color-mix(in srgb, ' + color + ' 12%, white)');
+                r.style.setProperty('--secondary', 'color-mix(in srgb, ' + color + ' 8%, white)');
+                r.style.setProperty('--sidebar-accent', 'color-mix(in srgb, ' + color + ' 10%, white)');
+                r.style.setProperty('--muted', 'color-mix(in srgb, ' + color + ' 6%, white)');
+              }
+            } catch(e) {}
+          })();
+        `}} />
       </head>
       <body>
         {children}
@@ -104,6 +123,19 @@ function RootComponent() {
   useEffect(() => {
     const stored = localStorage.getItem("theme");
     if (stored === "dark") document.documentElement.classList.add("dark");
+    const color = localStorage.getItem("user-color");
+    if (color) {
+      document.documentElement.style.setProperty("--primary", color);
+      document.documentElement.style.setProperty("--ring", color);
+      document.documentElement.style.setProperty("--rose-burnt", color);
+      document.documentElement.style.setProperty("--chart-1", color);
+      document.documentElement.style.setProperty("--sidebar-primary", color);
+      document.documentElement.style.setProperty("--accent", `color-mix(in srgb, ${color} 12%, white)`);
+      document.documentElement.style.setProperty("--secondary", `color-mix(in srgb, ${color} 8%, white)`);
+      document.documentElement.style.setProperty("--sidebar-accent", `color-mix(in srgb, ${color} 10%, white)`);
+      document.documentElement.style.setProperty("--muted", `color-mix(in srgb, ${color} 6%, white)`);
+      document.documentElement.style.setProperty("--muted", `color-mix(in srgb, ${color} 6%, white)`);
+    }
   }, []);
 
   useEffect(() => {
