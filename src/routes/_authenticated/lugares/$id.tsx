@@ -379,9 +379,21 @@ function PlaceDetailPage() {
 
 function Photo({ path, onRemove }: { path: string; onRemove: () => void }) {
   const url = useSignedUrl(path, 800);
+  const [loaded, setLoaded] = useState(false);
   return (
     <div className="group relative aspect-square overflow-hidden rounded-2xl bg-muted">
-      {url && <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />}
+      {url && (
+        <img
+          src={url}
+          alt=""
+          loading="lazy"
+          onLoad={() => setLoaded(true)}
+          className={cn(
+            "h-full w-full object-cover transition-all duration-500",
+            loaded ? "opacity-100 blur-0 scale-100" : "opacity-0 blur-sm scale-105"
+          )}
+        />
+      )}
       <button
         type="button"
         onClick={onRemove}

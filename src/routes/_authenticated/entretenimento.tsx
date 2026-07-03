@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ScoreInput } from "@/components/score-input";
 import { UserAvatar } from "@/components/user-avatar";
 import { useSignedUrl } from "@/hooks/use-signed-url";
+import { FadeImage } from "@/components/fade-image";
 import {
   ENT_TYPES,
   ENT_LABEL,
@@ -219,12 +220,7 @@ function EntCard({
     >
       <div className="relative aspect-2/3 w-full bg-muted">
         {url ? (
-          <img
-            src={url}
-            alt={item.title}
-            loading="lazy"
-            className="h-full w-full object-cover transition group-hover:scale-105"
-          />
+          <FadeImage src={url} alt={item.title} className="h-full w-full object-cover group-hover:scale-105" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted-foreground/40">
             <Icon className="h-8 w-8" />
@@ -519,7 +515,7 @@ function EntDetailDialog({
             <div className="flex gap-4">
               <div className="relative aspect-2/3 w-32 shrink-0 overflow-hidden rounded-2xl bg-muted">
                 {coverUrl ? (
-                  <img src={coverUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  <FadeImage src={coverUrl} className="h-full w-full object-cover" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-muted-foreground/40">
                     <Icon className="h-8 w-8" />

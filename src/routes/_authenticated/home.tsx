@@ -1,3 +1,4 @@
+import { FadeImage } from "@/components/fade-image";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -164,10 +165,15 @@ function SectionTitle({ icon, title, link, action }: { icon: React.ReactNode; ti
 }
 
 function PlaceCover({ path }: { path: string | null }) {
-  const url = useSignedUrl(path);
+  const url = useSignedUrl(path, 400);
   return (
-    <div className="aspect-square w-full bg-muted">
-      {url && <img src={url} alt="" className="h-full w-full object-cover transition group-hover:scale-105" />}
+    <div className="aspect-square w-full overflow-hidden bg-muted">
+      {url && (
+        <FadeImage
+          src={url}
+          className="h-full w-full object-cover group-hover:scale-105"
+        />
+      )}
     </div>
   );
 }

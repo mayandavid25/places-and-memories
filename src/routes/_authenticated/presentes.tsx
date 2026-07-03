@@ -1,3 +1,4 @@
+import { FadeImage } from "@/components/fade-image";
 import imageCompression from "browser-image-compression";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -240,7 +241,7 @@ function GiftCard({ gift, canEdit, onEdit }: { gift: GiftRow; canEdit: boolean; 
       )}
     >
       <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
-        {url && <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />}
+        <FadeImage src={url} className="h-full w-full object-cover" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
@@ -434,7 +435,7 @@ function GiftFormDialog({
           <Label>Foto</Label>
           <div className="mt-1 flex items-center gap-3">
             <div className="h-20 w-20 overflow-hidden rounded-xl border border-border bg-muted">
-              {previewUrl && <img src={previewUrl} alt="" className="h-full w-full object-cover" />}
+              <FadeImage src={previewUrl} className="h-full w-full object-cover" />
             </div>
             <div className="flex flex-col gap-2">
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-xs hover:border-primary/40">

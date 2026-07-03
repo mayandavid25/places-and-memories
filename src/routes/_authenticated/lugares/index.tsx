@@ -14,6 +14,7 @@ import { CATEGORIES, CATEGORY_LABEL, type PlaceCategory } from "@/lib/categories
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WishlistContent } from "@/routes/_authenticated/wishlist";
+import { FadeImage } from "@/components/fade-image";
 
 export const Route = createFileRoute("/_authenticated/lugares/")({
   component: LugaresPage,
@@ -214,9 +215,8 @@ function PlaceCard({ place }: { place: PlaceRow & { avg: number } }) {
       params={{ id: place.id }}
       className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-0.5"
     >
-      <div className="relative aspect-3/4 w-full bg-muted">
-        {url && <img src={url} alt={place.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />}
-        {place.favorited && (
+      <div className="relative aspect-3/4 w-full overflow-hidden bg-muted">
+        <FadeImage src={url} alt={place.name} className="h-full w-full object-cover group-hover:scale-105" />        {place.favorited && (
           <span className="absolute right-2 top-2 rounded-full bg-background/90 p-1.5">
             <Heart className="h-3 w-3 fill-primary text-primary" />
           </span>

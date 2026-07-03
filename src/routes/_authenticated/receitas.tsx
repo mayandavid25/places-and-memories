@@ -1,3 +1,4 @@
+import { FadeImage } from "@/components/fade-image";
 import imageCompression from "browser-image-compression";
 import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -236,7 +237,7 @@ function RecipeCard({ recipe, onOpen }: { recipe: RecipeRow; onOpen: () => void 
     >
       <div className="relative aspect-3/4 w-full bg-muted">
         {url ? (
-          <img src={url} alt={recipe.name} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
+          <FadeImage src={url} alt={recipe.name} className="h-full w-full object-cover group-hover:scale-105" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-muted-foreground/50">
             <ChefHat className="h-8 w-8" />
@@ -844,7 +845,7 @@ function CoverDisplay({ path }: { path: string | null }) {
   return (
     <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted">
       {url ? (
-        <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
+        <FadeImage src={url} className="h-full w-full object-cover" />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-muted-foreground/40">
           <ChefHat className="h-10 w-10" />
@@ -866,6 +867,7 @@ function PhotoThumb({
   onRemove: () => void;
 }) {
   const url = useSignedUrl(path, 400);
+  const [loaded, setLoaded] = useState(false);
   return (
     <div
       className={cn(

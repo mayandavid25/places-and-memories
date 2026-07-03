@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { PlaceAutocomplete } from "@/components/place-autocomplete";
 import { MapsActions } from "@/components/maps-actions";
 import { useSignedUrl } from "@/hooks/use-signed-url";
+import { FadeImage } from "@/components/fade-image";
 
 export const Route = createFileRoute("/_authenticated/calendario")({
   component: CalendarPage,
@@ -780,7 +781,7 @@ function EventPhotoThumb({ path, onRemove }: { path: string; onRemove: () => voi
   const url = useSignedUrl(path, 400);
   return (
     <div className="relative h-20 w-20 overflow-hidden rounded-xl bg-muted">
-      {url && <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />}
+      <FadeImage src={url} className="h-full w-full object-cover" />
       <button type="button" onClick={onRemove}
         className="absolute right-1 top-1 rounded-full bg-background/90 p-1 text-foreground hover:bg-destructive hover:text-destructive-foreground">
         <X className="h-3 w-3" />

@@ -208,7 +208,7 @@ function PhotoThumb({ path, onRemove }: { path: string; onRemove: () => void }) 
   const url = useSignedUrl(path, 400);
   return (
     <div className="relative h-20 w-20 overflow-hidden rounded-xl bg-muted">
-      {url && <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />}
+      <FadeImage src={url} className="h-full w-full object-cover" />
       <button
         type="button"
         onClick={onRemove}
