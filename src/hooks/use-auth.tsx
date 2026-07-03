@@ -8,6 +8,7 @@ type Profile = {
   username: string | null;
   avatar_url: string | null;
   couple_id: string | null;
+  color: string;
 };
 
 type AuthContextValue = {
@@ -28,12 +29,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const loadProfile = async (uid: string) => {
-    const { data } = await supabase
+    const { data } = await (supabase
       .from("profiles")
-      .select("id, display_name, username, avatar_url, couple_id")
+      .select("id, display_name, username, avatar_url, couple_id, color")
       .eq("id", uid)
-      .maybeSingle();
+      .maybeSingle()) as any;
     setProfile(data ?? null);
+    if (data?.color) {
+      document.documentElement.style.setProperty("--primary", data.color);
+      document.documentElement.style.setProperty("--ring", data.color);
+      document.documentElement.style.setProperty("--sidebar-primary", data.color);
+    }
   };
 
   useEffect(() => {

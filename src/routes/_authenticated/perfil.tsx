@@ -46,6 +46,7 @@ function PerfilPage() {
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
   const [name, setName] = useState(profile?.display_name ?? "");
+const [color, setColor] = useState(profile?.color ?? "#ff9ebd");
   const [busy, setBusy] = useState(false);
   const deleteAccountFn = useServerFn(deleteAccount);
 
@@ -130,6 +131,14 @@ function PerfilPage() {
     if (error) return toast.error(error.message);
     await refreshProfile();
     toast.success("Atualizado");
+  };
+
+  const saveColor = async (newColor: string) => {
+  if (!user) return;
+  setColor(newColor);
+  const { error } = await supabase.from("profiles").update({ color: newColor } as any).eq("id", user.id);
+  if (error) return toast.error(error.message);
+  await refreshProfile();
   };
 
   const onAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -291,6 +300,19 @@ function PerfilPage() {
             <Input value={name} onChange={(e) => setName(e.target.value)} className="h-10 rounded-xl" />
             <Button onClick={saveName} disabled={busy} className="rounded-xl">Salvar</Button>
           </div>
+        </div>
+
+        <div className="mt-6 space-y-2">
+          <Label>Minha cor</Label>
+          <label className="flex h-10 w-fit items-center gap-3 rounded-xl border border-border px-3">
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => saveColor(e.target.value)}
+              className="h-6 w-6 cursor-pointer rounded-full border-none bg-transparent p-0"
+            />
+            <span className="text-sm text-muted-foreground">{color}</span>
+          </label>
         </div>
 
         <div className="mt-8 grid grid-cols-3 gap-3 text-center">

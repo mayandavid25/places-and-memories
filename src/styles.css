@@ -179,4 +179,7 @@
   body, p, span, button, input, textarea, select, label {
     font-weight: 400;
   }
+  :root {
+  --background: color-mix(in srgb, var(--primary) 4%, white);
+}
 }
