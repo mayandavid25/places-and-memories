@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { PlaceAutocomplete } from "@/components/place-autocomplete";
 import { MapsActions } from "@/components/maps-actions";
 import { FadeImage } from "@/components/fade-image";
+import { TagsField, TagsFilter } from "@/components/tags-field";
 
 export const Route = createFileRoute("/_authenticated/wishlist")({
   component: function WishlistRedirect() {
