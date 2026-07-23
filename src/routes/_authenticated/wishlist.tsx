@@ -252,6 +252,12 @@ return (
         />
       )}
 
+      <TagsFilter
+        selected={tagFilter}
+        onToggle={(t) => setTagFilter((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))}
+        onClear={() => setTagFilter([])}
+      />
+
       <div className="space-y-8">
         {groups.map(({ status, items }) => (
           <section key={status}>
