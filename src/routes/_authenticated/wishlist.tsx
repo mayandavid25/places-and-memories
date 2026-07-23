@@ -51,6 +51,7 @@ type WishlistItem = {
   photos: string[];
   is_private: boolean;
   linked_place_id: string | null;
+  tags: string[] | null;
   created_at: string;
 };
 
@@ -126,6 +127,7 @@ export function WishlistContent({ embedded = false, openNew: openNewProp, onOpen
         lat: item.lat,
         lng: item.lng,
         photos: item.photos ?? [],
+        tags: item.tags ?? [],
       } as never).select().single();
 
       if (placeError) {
