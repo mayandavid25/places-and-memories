@@ -15,6 +15,7 @@ import { useSignedUrl } from "@/hooks/use-signed-url";
 import { CATEGORIES, CATEGORY_LABEL, type PlaceCategory } from "@/lib/categories";
 import { PlaceAutocomplete } from "@/components/place-autocomplete";
 import { MapsActions } from "@/components/maps-actions";
+import { TagsField } from "@/components/tags-field";
 import { ArrowLeft, Heart, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
