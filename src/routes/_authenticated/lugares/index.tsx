@@ -65,7 +65,7 @@ function LugaresPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("places")
-        .select("id, name, category, location, photos, favorited, visited_at, created_at, place_reviews(rating)")
+        .select("id, name, category, location, photos, favorited, visited_at, created_at, tags, place_reviews(rating)")
         .eq("couple_id", coupleId!)
         .order("created_at", { ascending: false });
       return (data ?? []) as PlaceRow[];
