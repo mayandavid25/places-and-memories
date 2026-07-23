@@ -163,6 +163,12 @@ function LugaresPage() {
             ))}
           </div>
 
+          <TagsFilter
+            selected={selectedTags}
+            onToggle={(t) => setSelectedTags((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))}
+            onClear={() => setSelectedTags([])}
+          />
+
           <div className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
             Nota mínima:
             <ScoreInput value={minRating} onChange={setMinRating} />
