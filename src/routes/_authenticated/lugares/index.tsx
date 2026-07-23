@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WishlistContent } from "@/routes/_authenticated/wishlist";
 import { FadeImage } from "@/components/fade-image";
+import { TagsFilter } from "@/components/tags-field";
 
 export const Route = createFileRoute("/_authenticated/lugares/")({
   component: LugaresPage,
