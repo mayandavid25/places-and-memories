@@ -399,6 +399,7 @@ function WishlistFormDialog({
   const [note, setNote] = useState(item?.note ?? "");
   const [photos, setPhotos] = useState<string[]>(item?.photos ?? []);
   const [isPrivate, setIsPrivate] = useState<boolean>(item?.is_private ?? false);
+  const [tags, setTags] = useState<string[]>(item?.tags ?? []);
   const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -414,6 +415,7 @@ function WishlistFormDialog({
       setNote(item.note ?? "");
       setPhotos(item.photos ?? []);
       setIsPrivate(item.is_private ?? false);
+      setTags(item.tags ?? []);
     }
   }, [item]);
 
