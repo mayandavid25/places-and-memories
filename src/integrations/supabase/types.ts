@@ -400,6 +400,38 @@ export type Database = {
           },
         ]
       }
+      place_tags: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "place_tags_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       places: {
         Row: {
           category: Database["public"]["Enums"]["place_category"]
@@ -414,6 +446,7 @@ export type Database = {
           location: string | null
           name: string
           photos: string[]
+          tags: string[]
           visited_at: string | null
         }
         Insert: {
@@ -429,6 +462,7 @@ export type Database = {
           location?: string | null
           name: string
           photos?: string[]
+          tags?: string[]
           visited_at?: string | null
         }
         Update: {
@@ -444,6 +478,7 @@ export type Database = {
           location?: string | null
           name?: string
           photos?: string[]
+          tags?: string[]
           visited_at?: string | null
         }
         Relationships: [
@@ -629,6 +664,7 @@ export type Database = {
           planned_date: string | null
           priority: number
           status: Database["public"]["Enums"]["wishlist_status"]
+          tags: string[]
         }
         Insert: {
           category?: Database["public"]["Enums"]["place_category"] | null
@@ -648,6 +684,7 @@ export type Database = {
           planned_date?: string | null
           priority?: number
           status?: Database["public"]["Enums"]["wishlist_status"]
+          tags?: string[]
         }
         Update: {
           category?: Database["public"]["Enums"]["place_category"] | null
@@ -667,6 +704,7 @@ export type Database = {
           planned_date?: string | null
           priority?: number
           status?: Database["public"]["Enums"]["wishlist_status"]
+          tags?: string[]
         }
         Relationships: [
           {
