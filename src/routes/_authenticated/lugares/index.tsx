@@ -90,7 +90,8 @@ function LugaresPage() {
     const result = withAvg
       .filter((p) => (categories.length === 0 ? true : categories.includes(p.category)))
       .filter((p) => (query ? p.name.toLowerCase().includes(query.toLowerCase()) : true))
-      .filter((p) => p.avg >= minRating);
+      .filter((p) => p.avg >= minRating)
+      .filter((p) => (selectedTags.length === 0 ? true : selectedTags.every((t) => (p.tags ?? []).includes(t))));
 
     result.sort((a, b) => {
       switch (sort) {
@@ -110,7 +111,7 @@ function LugaresPage() {
     });
 
     return result;
-  }, [data, query, categories, minRating, sort]);
+  }, [data, query, categories, minRating, sort, selectedTags]);
 
   return (
     <PageShell>
