@@ -53,6 +53,7 @@ function LugaresPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [categories, setCategories] = useState<PlaceCategory[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [minRating, setMinRating] = useState(0);
   const [sort, setSort] = useState<SortOption>("recent");
   const { tab } = useSearch({ from: "/_authenticated/lugares/" });
