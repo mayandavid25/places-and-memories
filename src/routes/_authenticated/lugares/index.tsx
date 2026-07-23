@@ -33,6 +33,7 @@ type PlaceRow = {
   favorited: boolean;
   visited_at: string | null;
   created_at: string;
+  tags: string[] | null;
   place_reviews: { rating: number }[];
 };
 
