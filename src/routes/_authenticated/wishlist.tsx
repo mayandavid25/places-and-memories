@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { PlaceAutocomplete } from "@/components/place-autocomplete";
 import { MapsActions } from "@/components/maps-actions";
 import { FadeImage } from "@/components/fade-image";
+import { TagsField, TagsFilter } from "@/components/tags-field";
 
 export const Route = createFileRoute("/_authenticated/wishlist")({
   component: function WishlistRedirect() {
@@ -50,6 +51,7 @@ type WishlistItem = {
   photos: string[];
   is_private: boolean;
   linked_place_id: string | null;
+  tags: string[] | null;
   created_at: string;
 };
 
@@ -125,6 +127,7 @@ export function WishlistContent({ embedded = false, openNew: openNewProp, onOpen
         lat: item.lat,
         lng: item.lng,
         photos: item.photos ?? [],
+        tags: item.tags ?? [],
       } as never).select().single();
 
       if (placeError) {
@@ -164,9 +167,12 @@ export function WishlistContent({ embedded = false, openNew: openNewProp, onOpen
     qc.invalidateQueries({ queryKey: ["place-reviews", linkedPlaceId] });
   };
 
-  const groups = (["queremos_visitar", "planejado", "visitado"] as const).map((s) => ({
+  const [tagFilter, setTagFilter] = useState<string[]>([]);
+  const groups = (["queremos_visitar", "planejado"] as const).map((s) => ({
     status: s,
-    items: (data ?? []).filter((i) => i.status === s),
+    items: (data ?? [])
+      .filter((i) => i.status === s)
+      .filter((i) => tagFilter.length === 0 || tagFilter.every((t) => (i.tags ?? []).includes(t))),
   }));
 
 const addDialog = (
@@ -245,6 +251,12 @@ return (
           action={addDialog}
         />
       )}
+
+      <TagsFilter
+        selected={tagFilter}
+        onToggle={(t) => setTagFilter((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))}
+        onClear={() => setTagFilter([])}
+      />
 
       <div className="space-y-8">
         {groups.map(({ status, items }) => (
@@ -387,6 +399,7 @@ function WishlistFormDialog({
   const [note, setNote] = useState(item?.note ?? "");
   const [photos, setPhotos] = useState<string[]>(item?.photos ?? []);
   const [isPrivate, setIsPrivate] = useState<boolean>(item?.is_private ?? false);
+  const [tags, setTags] = useState<string[]>(item?.tags ?? []);
   const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -402,6 +415,7 @@ function WishlistFormDialog({
       setNote(item.note ?? "");
       setPhotos(item.photos ?? []);
       setIsPrivate(item.is_private ?? false);
+      setTags(item.tags ?? []);
     }
   }, [item]);
 
@@ -445,6 +459,7 @@ function WishlistFormDialog({
         note: note.trim() || null,
         photos,
         is_private: isPrivate,
+        tags,
       } as never;
       if (mode === "create") {
         const { error } = await supabase.from("wishlist_items").insert({
@@ -554,6 +569,12 @@ function WishlistFormDialog({
             </label>
           </div>
         </div>
+
+        <div className="space-y-1.5">
+          <Label>Tags</Label>
+          <TagsField value={tags} onChange={setTags} />
+        </div>
+
 
         <div className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2">
           <div className="flex items-center gap-2">

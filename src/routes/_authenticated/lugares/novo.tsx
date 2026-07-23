@@ -14,6 +14,8 @@ import { toast } from "sonner";
 import { CATEGORIES, CATEGORY_LABEL, type PlaceCategory } from "@/lib/categories";
 import { Upload, X } from "lucide-react";
 import { useSignedUrl } from "@/hooks/use-signed-url";
+import { FadeImage } from "@/components/fade-image";
+import { TagsField } from "@/components/tags-field";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/lugares/novo")({
@@ -35,6 +37,7 @@ function NovoLugarPage() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -78,6 +81,7 @@ function NovoLugarPage() {
           lng: coords.lng,
           visited_at: visitedAt || null,
           photos,
+          tags,
           created_by: user.id,
         } as never)
         .select("id")
@@ -179,6 +183,11 @@ function NovoLugarPage() {
               <Upload className="h-4 w-4" />
             </label>
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Tags</Label>
+          <TagsField value={tags} onChange={setTags} />
         </div>
 
         <div className="space-y-1.5">

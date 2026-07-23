@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WishlistContent } from "@/routes/_authenticated/wishlist";
 import { FadeImage } from "@/components/fade-image";
+import { TagsFilter } from "@/components/tags-field";
 
 export const Route = createFileRoute("/_authenticated/lugares/")({
   component: LugaresPage,
@@ -32,6 +33,7 @@ type PlaceRow = {
   favorited: boolean;
   visited_at: string | null;
   created_at: string;
+  tags: string[] | null;
   place_reviews: { rating: number }[];
 };
 
@@ -51,6 +53,7 @@ function LugaresPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [categories, setCategories] = useState<PlaceCategory[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [minRating, setMinRating] = useState(0);
   const [sort, setSort] = useState<SortOption>("recent");
   const { tab } = useSearch({ from: "/_authenticated/lugares/" });
@@ -62,7 +65,7 @@ function LugaresPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("places")
-        .select("id, name, category, location, photos, favorited, visited_at, created_at, place_reviews(rating)")
+        .select("id, name, category, location, photos, favorited, visited_at, created_at, tags, place_reviews(rating)")
         .eq("couple_id", coupleId!)
         .order("created_at", { ascending: false });
       return (data ?? []) as PlaceRow[];
@@ -87,7 +90,8 @@ function LugaresPage() {
     const result = withAvg
       .filter((p) => (categories.length === 0 ? true : categories.includes(p.category)))
       .filter((p) => (query ? p.name.toLowerCase().includes(query.toLowerCase()) : true))
-      .filter((p) => p.avg >= minRating);
+      .filter((p) => p.avg >= minRating)
+      .filter((p) => (selectedTags.length === 0 ? true : selectedTags.every((t) => (p.tags ?? []).includes(t))));
 
     result.sort((a, b) => {
       switch (sort) {
@@ -107,7 +111,7 @@ function LugaresPage() {
     });
 
     return result;
-  }, [data, query, categories, minRating, sort]);
+  }, [data, query, categories, minRating, sort, selectedTags]);
 
   return (
     <PageShell>
@@ -158,6 +162,12 @@ function LugaresPage() {
               </Chip>
             ))}
           </div>
+
+          <TagsFilter
+            selected={selectedTags}
+            onToggle={(t) => setSelectedTags((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))}
+            onClear={() => setSelectedTags([])}
+          />
 
           <div className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
             Nota mínima:
