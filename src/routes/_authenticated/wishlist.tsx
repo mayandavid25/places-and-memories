@@ -570,6 +570,12 @@ function WishlistFormDialog({
           </div>
         </div>
 
+        <div className="space-y-1.5">
+          <Label>Tags</Label>
+          <TagsField value={tags} onChange={setTags} />
+        </div>
+
+
         <div className="flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2">
           <div className="flex items-center gap-2">
             <Lock className="h-4 w-4 text-muted-foreground" />
