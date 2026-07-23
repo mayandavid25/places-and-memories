@@ -338,6 +338,11 @@ function PlaceDetailPage() {
             </div>
           )}
         </div>
+
+        <div className="space-y-1.5">
+          <Label>Tags</Label>
+          <TagsField value={tags} onChange={setTags} />
+        </div>
       </div>
 
       {/* Reviews */}
