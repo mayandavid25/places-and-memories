@@ -39,6 +39,7 @@ type PlaceFull = {
   visited_at: string | null;
   couple_id: string;
   created_by: string;
+  tags: string[] | null;
 };
 
 function PlaceDetailPage() {
