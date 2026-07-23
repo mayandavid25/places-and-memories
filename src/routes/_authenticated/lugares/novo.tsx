@@ -14,6 +14,8 @@ import { toast } from "sonner";
 import { CATEGORIES, CATEGORY_LABEL, type PlaceCategory } from "@/lib/categories";
 import { Upload, X } from "lucide-react";
 import { useSignedUrl } from "@/hooks/use-signed-url";
+import { FadeImage } from "@/components/fade-image";
+import { TagsField } from "@/components/tags-field";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/lugares/novo")({
