@@ -81,6 +81,7 @@ function NovoLugarPage() {
           lng: coords.lng,
           visited_at: visitedAt || null,
           photos,
+          tags,
           created_by: user.id,
         } as never)
         .select("id")
