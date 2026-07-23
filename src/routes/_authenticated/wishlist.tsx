@@ -459,6 +459,7 @@ function WishlistFormDialog({
         note: note.trim() || null,
         photos,
         is_private: isPrivate,
+        tags,
       } as never;
       if (mode === "create") {
         const { error } = await supabase.from("wishlist_items").insert({
