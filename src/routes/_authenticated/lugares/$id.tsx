@@ -105,6 +105,7 @@ function PlaceDetailPage() {
     formatted_address: string | null;
   }>({ lat: null, lng: null, formatted_address: null });
   const [visitedAt, setVisitedAt] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
 
   useEffect(() => {
     if (place) {
@@ -117,13 +118,16 @@ function PlaceDetailPage() {
         formatted_address: place.formatted_address,
       });
       setVisitedAt(place.visited_at ?? "");
+      setTags(place.tags ?? []);
     }
-  }, [place?.id, place?.name, place?.category, place?.location, place?.lat, place?.lng, place?.formatted_address, place?.visited_at]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [place?.id, place?.name, place?.category, place?.location, place?.lat, place?.lng, place?.formatted_address, place?.visited_at, place?.tags]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Debounced autosave for editable fields
   const debouncedRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (!place) return;
+    const currentTags = place.tags ?? [];
+    const tagsDirty = tags.length !== currentTags.length || tags.some((t, i) => t !== currentTags[i]);
     const dirty =
       name !== place.name ||
       category !== place.category ||
@@ -131,7 +135,8 @@ function PlaceDetailPage() {
       visitedAt !== (place.visited_at ?? "") ||
       coords.lat !== place.lat ||
       coords.lng !== place.lng ||
-      coords.formatted_address !== place.formatted_address;
+      coords.formatted_address !== place.formatted_address ||
+      tagsDirty;
     if (!dirty) return;
     if (debouncedRef.current) clearTimeout(debouncedRef.current);
     debouncedRef.current = setTimeout(async () => {
@@ -145,7 +150,8 @@ function PlaceDetailPage() {
           lat: coords.lat,
           lng: coords.lng,
           visited_at: visitedAt || null,
-        })
+          tags,
+        } as never)
         .eq("id", id);
       qc.invalidateQueries({ queryKey: ["place", id] });
       qc.invalidateQueries({ queryKey: ["places"] });
@@ -153,7 +159,7 @@ function PlaceDetailPage() {
     return () => {
       if (debouncedRef.current) clearTimeout(debouncedRef.current);
     };
-  }, [name, category, location, visitedAt, coords, place, id, qc]);
+  }, [name, category, location, visitedAt, coords, tags, place, id, qc]);
 
   const toggleFav = async () => {
     if (!place) return;
