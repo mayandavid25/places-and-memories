@@ -55,7 +55,7 @@ function PlaceDetailPage() {
       const { data, error } = await supabase
         .from("places")
         .select(
-          "id, name, category, location, formatted_address, lat, lng, photos, favorited, visited_at, couple_id, created_by",
+          "id, name, category, location, formatted_address, lat, lng, photos, favorited, visited_at, couple_id, created_by, tags",
         )
         .eq("id", id)
         .single();
