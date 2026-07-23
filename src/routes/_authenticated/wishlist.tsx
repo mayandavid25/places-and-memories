@@ -167,9 +167,12 @@ export function WishlistContent({ embedded = false, openNew: openNewProp, onOpen
     qc.invalidateQueries({ queryKey: ["place-reviews", linkedPlaceId] });
   };
 
-  const groups = (["queremos_visitar", "planejado", "visitado"] as const).map((s) => ({
+  const [tagFilter, setTagFilter] = useState<string[]>([]);
+  const groups = (["queremos_visitar", "planejado"] as const).map((s) => ({
     status: s,
-    items: (data ?? []).filter((i) => i.status === s),
+    items: (data ?? [])
+      .filter((i) => i.status === s)
+      .filter((i) => tagFilter.length === 0 || tagFilter.every((t) => (i.tags ?? []).includes(t))),
   }));
 
 const addDialog = (
